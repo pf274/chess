@@ -7,6 +7,11 @@ public class ChessPieceImplementation implements ChessPiece {
     public ChessGame.TeamColor color;
     public ChessPiece.PieceType type;
 
+    public ChessPieceImplementation(ChessPiece.PieceType type, ChessGame.TeamColor color) {
+        this.color = color;
+        this.type = type;
+    }
+
     /**
      * @return Which team this chess piece belongs to
      */
@@ -33,6 +38,29 @@ public class ChessPieceImplementation implements ChessPiece {
      */
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        switch (type) {
+            case PAWN:
+
+                break;
+            case ROOK:
+
+                break;
+            case BISHOP:
+
+                break;
+            case KNIGHT:
+
+                break;
+            case QUEEN:
+
+                break;
+            case KING:
+
+                break;
+            default:
+                // TODO: THIS SHOULD NEVER HAPPEN
+                break;
+        }
         // TODO: pieceMoves
         return null;
     }

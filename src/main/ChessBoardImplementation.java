@@ -1,4 +1,5 @@
 import chess.ChessBoard;
+import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
@@ -60,5 +61,41 @@ public class ChessBoardImplementation implements ChessBoard {
     @Override
     public void resetBoard() {
         board = new ChessPiece[8][8];
+        // create chess pieces
+        ChessPieceImplementation whiteKnight = new ChessPieceImplementation(ChessPiece.PieceType.KNIGHT, ChessGame.TeamColor.WHITE);
+        ChessPieceImplementation blackKnight = new ChessPieceImplementation(ChessPiece.PieceType.KNIGHT, ChessGame.TeamColor.BLACK);
+        ChessPieceImplementation whitePawn = new ChessPieceImplementation(ChessPiece.PieceType.PAWN, ChessGame.TeamColor.WHITE);
+        ChessPieceImplementation blackPawn = new ChessPieceImplementation(ChessPiece.PieceType.PAWN, ChessGame.TeamColor.BLACK);
+        ChessPieceImplementation whiteRook = new ChessPieceImplementation(ChessPiece.PieceType.ROOK, ChessGame.TeamColor.WHITE);
+        ChessPieceImplementation blackRook = new ChessPieceImplementation(ChessPiece.PieceType.ROOK, ChessGame.TeamColor.BLACK);
+        ChessPieceImplementation whiteBishop = new ChessPieceImplementation(ChessPiece.PieceType.BISHOP, ChessGame.TeamColor.WHITE);
+        ChessPieceImplementation blackBishop = new ChessPieceImplementation(ChessPiece.PieceType.BISHOP, ChessGame.TeamColor.BLACK);
+        ChessPieceImplementation whiteKing = new ChessPieceImplementation(ChessPiece.PieceType.KING, ChessGame.TeamColor.WHITE);
+        ChessPieceImplementation blackKing = new ChessPieceImplementation(ChessPiece.PieceType.KING, ChessGame.TeamColor.BLACK);
+        ChessPieceImplementation whiteQueen = new ChessPieceImplementation(ChessPiece.PieceType.QUEEN, ChessGame.TeamColor.WHITE);
+        ChessPieceImplementation blackQueen = new ChessPieceImplementation(ChessPiece.PieceType.QUEEN, ChessGame.TeamColor.BLACK);
+        // add the white special pieces
+        board[0][0] = whiteRook;
+        board[0][1] = whiteKnight;
+        board[0][2] = whiteBishop;
+        board[0][3] = whiteQueen;
+        board[0][4] = whiteKing;
+        board[0][5] = whiteBishop;
+        board[0][6] = whiteKnight;
+        board[0][7] = whiteRook;
+        // add the black special pieces
+        board[7][0] = blackRook;
+        board[7][1] = blackKnight;
+        board[7][2] = blackBishop;
+        board[7][3] = blackQueen;
+        board[7][4] = blackKing;
+        board[7][5] = blackBishop;
+        board[7][6] = blackKnight;
+        board[7][7] = blackRook;
+        // add the pawns
+        for (int i = 0; i < 8; i++) {
+            board[1][i] = whitePawn;
+            board[6][i] = blackPawn;
+        }
     }
 }
