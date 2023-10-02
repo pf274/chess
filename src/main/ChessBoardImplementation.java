@@ -2,13 +2,10 @@ import chess.ChessBoard;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
-import java.util.ArrayList;
 
 public class ChessBoardImplementation implements ChessBoard {
 
-//    ArrayList<ChessPiece> pieces = new ArrayList<>();
-
-    ChessPiece[][] board = new ChessPiece[8][8];
+    private ChessPiece[][] board = new ChessPiece[8][8];
 
     public ChessBoardImplementation() {
         resetBoard();
@@ -47,6 +44,15 @@ public class ChessBoardImplementation implements ChessBoard {
         return board[row][column];
     }
 
+    public void movePiece(ChessPosition startingPosition, ChessPosition endingPosition) {
+        int startingRow = startingPosition.getRow() - 1;
+        int startingCol = startingPosition.getColumn() - 1;
+        ChessPiece selectedPiece = getPiece(startingPosition);
+        int endingRow = endingPosition.getRow() - 1;
+        int endingCol = endingPosition.getColumn() - 1;
+        board[endingRow][endingCol] = selectedPiece;
+        board[startingRow][startingCol] = null;
+    }
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
