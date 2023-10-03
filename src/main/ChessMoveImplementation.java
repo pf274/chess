@@ -6,6 +6,11 @@ public class ChessMoveImplementation implements ChessMove {
 
     ChessPosition startingPosition;
     ChessPosition endingPosition;
+
+    public ChessMoveImplementation(ChessPosition startingPosition, ChessPosition endingPosition) {
+        this.startingPosition = startingPosition;
+        this.endingPosition = endingPosition;
+    }
     /**
      * @return ChessPosition of starting location
      */

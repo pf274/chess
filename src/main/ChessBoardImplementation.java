@@ -1,23 +1,20 @@
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 
 public class ChessBoardImplementation implements ChessBoard {
 
-    private ChessPiece[][] board = new ChessPiece[8][8];
+    private ChessPieceImplementation[][] board = new ChessPieceImplementation[8][8];
 
     public ChessBoardImplementation() {
         resetBoard();
     }
 
-    public ChessPiece[][] getBoard() {
+    public ChessPieceImplementation[][] getBoard() {
         return board;
     }
 
     public void setBoard(ChessPiece[][] board) {
-        this.board = board;
+        this.board = (ChessPieceImplementation[][]) board;
     }
     /**
      * Adds a chess piece to the chessboard
@@ -29,7 +26,7 @@ public class ChessBoardImplementation implements ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         int row = position.getRow() - 1;
         int column = position.getColumn() - 1;
-        board[row][column] = piece;
+        board[row][column] = (ChessPieceImplementation) piece;
     }
 
     /**
@@ -51,7 +48,7 @@ public class ChessBoardImplementation implements ChessBoard {
         ChessPiece selectedPiece = getPiece(startingPosition);
         int endingRow = endingPosition.getRow() - 1;
         int endingCol = endingPosition.getColumn() - 1;
-        board[endingRow][endingCol] = selectedPiece;
+        board[endingRow][endingCol] = (ChessPieceImplementation) selectedPiece;
         board[startingRow][startingCol] = null;
     }
     /**
@@ -60,7 +57,7 @@ public class ChessBoardImplementation implements ChessBoard {
      */
     @Override
     public void resetBoard() {
-        board = new ChessPiece[8][8];
+        board = new ChessPieceImplementation[8][8];
         // create chess pieces
         ChessPieceImplementation whiteKnight = new ChessPieceImplementation(ChessPiece.PieceType.KNIGHT, ChessGame.TeamColor.WHITE);
         ChessPieceImplementation blackKnight = new ChessPieceImplementation(ChessPiece.PieceType.KNIGHT, ChessGame.TeamColor.BLACK);
@@ -97,5 +94,27 @@ public class ChessBoardImplementation implements ChessBoard {
             board[1][i] = whitePawn;
             board[6][i] = blackPawn;
         }
+    }
+
+    public void print() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPieceImplementation piece = board[i][j];
+                System.out.print("|" + board[i][j]);
+            }
+            System.out.print("|\n");
+        }
+    }
+
+    public boolean testMove(ChessMove potentialMove) {
+        var selectedPiece = getPiece(potentialMove.getStartPosition());
+        if (selectedPiece == null) {
+            return false;
+        }
+        var targetPiece = getPiece(potentialMove.getEndPosition());
+        if (targetPiece == null) {
+            return true;
+        }
+        return (targetPiece.getTeamColor() != selectedPiece.getTeamColor());
     }
 }

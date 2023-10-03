@@ -2,7 +2,7 @@ import chess.*;
 
 import java.util.Collection;
 
-public class ChessPieceImplementation implements ChessPiece {
+public abstract class ChessPieceImplementation implements ChessPiece {
 
     public ChessGame.TeamColor color;
     public ChessPiece.PieceType type;
@@ -28,6 +28,9 @@ public class ChessPieceImplementation implements ChessPiece {
         return type;
     }
 
+    @Override
+    abstract public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition);
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in danger
@@ -36,8 +39,7 @@ public class ChessPieceImplementation implements ChessPiece {
      * @param myPosition
      * @return Collection of valid moves
      */
-    @Override
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> pieceMoves2(ChessBoard board, ChessPosition myPosition) {
         switch (type) {
             case PAWN:
 
