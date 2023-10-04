@@ -2,6 +2,9 @@ package chess;
 
 import chess.Pieces.*;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 
 public class ChessBoardImpl implements ChessBoard {
 
@@ -43,6 +46,27 @@ public class ChessBoardImpl implements ChessBoard {
 
     public void setBoard(ChessPiece[][] board) {
         this.board = (ChessPieceImpl[][]) board;
+        initializeCastling();
+    }
+
+    private void initializeCastling() {
+        var whiteLeftRook = board[0][0];
+        var whiteLeftRookGood = whiteLeftRook != null && whiteLeftRook.getPieceType() == ChessPiece.PieceType.ROOK && whiteLeftRook.getTeamColor() == ChessGame.TeamColor.WHITE;
+        var whiteRightRook = board[0][7];
+        var whiteRightRookGood = whiteRightRook != null && whiteRightRook.getPieceType() == ChessPiece.PieceType.ROOK && whiteRightRook.getTeamColor() == ChessGame.TeamColor.WHITE;
+        var whiteKing = board[0][4];
+        var whiteKingGood = whiteKing != null && whiteKing.getPieceType() == ChessPiece.PieceType.KING && whiteKing.getTeamColor() == ChessGame.TeamColor.WHITE;
+        whiteLeftCastlePossible = whiteKingGood && whiteLeftRookGood;
+        whiteRightCastlePossible = whiteKingGood && whiteRightRookGood;
+        var blackLeftRook = board[7][0];
+        var blackLeftRookGood = blackLeftRook != null && blackLeftRook.getPieceType() == ChessPiece.PieceType.ROOK && blackLeftRook.getTeamColor() == ChessGame.TeamColor.BLACK;
+        var blackRightRook = board[7][7];
+        var blackRightRookGood = blackRightRook != null && blackRightRook.getPieceType() == ChessPiece.PieceType.ROOK && blackRightRook.getTeamColor() == ChessGame.TeamColor.BLACK;
+        var blackKing = board[7][4];
+        var blackKingGood = blackKing != null && blackKing.getPieceType() == ChessPiece.PieceType.KING && blackKing.getTeamColor() == ChessGame.TeamColor.BLACK;
+        blackLeftCastlePossible = blackKingGood && blackLeftRookGood;
+        blackRightCastlePossible = blackKingGood && blackRightRookGood;
+
     }
     /**
      * Adds a chess piece to the chessboard
@@ -128,6 +152,11 @@ public class ChessBoardImpl implements ChessBoard {
             board[1][i] = whitePawn;
             board[6][i] = blackPawn;
         }
+        // reset special moves
+        whiteRightCastlePossible = true;
+        whiteLeftCastlePossible = true;
+        blackRightCastlePossible = true;
+        blackLeftCastlePossible = true;
     }
 
     @Override
@@ -155,5 +184,52 @@ public class ChessBoardImpl implements ChessBoard {
             sb.append("|\n");
         }
         return sb.toString();
+    }
+
+
+    public Collection<ChessPosition> positionInDanger(ChessPosition testPosition, ChessGame.TeamColor teamColor) {
+        HashSet<ChessPosition> perpetrators = new HashSet<>();
+        // ensure that the position being tested is attackable
+        boolean addedPiece = false;
+        ChessPiece replacedPiece = null;
+        if (getPiece(testPosition) == null) {
+            addPiece(testPosition, new Pawn(teamColor));
+            addedPiece = true;
+        } else if (getPiece(testPosition).getTeamColor() != teamColor) {
+            var oppositeColor = getPiece(testPosition).getTeamColor();
+            var existingPiece = getPiece(testPosition);
+            switch (existingPiece.getPieceType()) {
+                case KING -> replacedPiece = new King(oppositeColor);
+                case QUEEN -> replacedPiece = new Queen(oppositeColor);
+                case ROOK -> replacedPiece = new Rook(oppositeColor);
+                case BISHOP -> replacedPiece = new Bishop(oppositeColor);
+                case KNIGHT -> replacedPiece = new Knight(oppositeColor);
+                default -> replacedPiece = new Pawn(oppositeColor);
+            }
+            addPiece(testPosition, new Pawn(teamColor));
+        }
+        // evaluate potential attacks
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                var position = new ChessPositionImpl(row, col);
+                var foundPiece = getPiece(position);
+                if (foundPiece != null) {
+                    if (foundPiece.getTeamColor() != teamColor) {
+                        var validMoves = foundPiece.pieceMoves(this, position);
+                        for (ChessMove validMove : validMoves) {
+                            if (validMove.getEndPosition().getRow() == testPosition.getRow() && validMove.getEndPosition().getColumn() == testPosition.getColumn()) {
+                                perpetrators.add(position);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (addedPiece) {
+            removePiece(testPosition);
+        } else if (replacedPiece != null) {
+            addPiece(testPosition, replacedPiece);
+        }
+        return perpetrators;
     }
 }

@@ -51,7 +51,6 @@ public class Knight extends ChessPieceImpl {
                 }
             }
         }
-        validMoves.removeIf(validMove -> !isSafeMove((ChessBoardImpl) board, color, validMove));
         return validMoves;
     }
 }

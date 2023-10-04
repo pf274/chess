@@ -5,6 +5,8 @@ import chess.Pieces.*;
 import java.util.Collection;
 import java.util.HashSet;
 
+import static chess.ChessPieceImpl.isSafeMove;
+
 public class ChessGameImpl implements ChessGame {
 
     ChessGame.TeamColor turn = ChessGame.TeamColor.WHITE;
@@ -40,7 +42,37 @@ public class ChessGameImpl implements ChessGame {
         if (selectedPiece == null) {
             return null;
         }
-        return selectedPiece.pieceMoves(boardInstance, startPosition);
+        var validMoves = selectedPiece.pieceMoves(boardInstance, startPosition);
+        validMoves.removeIf(validMove -> !isSafeMove(boardInstance, selectedPiece.getTeamColor(), validMove));
+        // remove illegal castle
+        if (selectedPiece.getPieceType() == ChessPiece.PieceType.KING) {
+            for (var validMove : validMoves) {
+                if (Math.abs(validMove.getStartPosition().getColumn() - validMove.getEndPosition().getColumn()) > 1) {
+                    // attempting to castle
+                    int castleRow = validMove.getStartPosition().getRow();
+                    TeamColor selectedPieceColor = selectedPiece.getTeamColor();
+                    if (validMove.getEndPosition().getColumn() == 3) {
+                        var position3safe = boardInstance.positionInDanger(new ChessPositionImpl(castleRow, 3), selectedPieceColor).isEmpty();
+                        var position4safe = boardInstance.positionInDanger(new ChessPositionImpl(castleRow, 4), selectedPieceColor).isEmpty();
+                        var position5safe = boardInstance.positionInDanger(new ChessPositionImpl(castleRow, 5), selectedPieceColor).isEmpty();
+                        if (!(position3safe && position4safe && position5safe)) {
+                            validMoves.remove(validMove);
+                        }
+                    } else { // column is 7
+                        var position5safe = boardInstance.positionInDanger(new ChessPositionImpl(castleRow, 5), selectedPieceColor).isEmpty();
+                        var position6safe = boardInstance.positionInDanger(new ChessPositionImpl(castleRow, 6), selectedPieceColor).isEmpty();
+                        var position7safe = boardInstance.positionInDanger(new ChessPositionImpl(castleRow, 7), selectedPieceColor).isEmpty();
+                        if (!(position5safe && position6safe && position7safe)) {
+                            validMoves.remove(validMove);
+                        }
+                    }
+                    if (isInCheck(selectedPiece.getTeamColor())) {
+                        validMoves.remove(validMove);
+                    }
+                }
+            }
+        }
+        return validMoves;
     }
 
     /**
@@ -51,6 +83,7 @@ public class ChessGameImpl implements ChessGame {
      */
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        var beforeMove = boardInstance.duplicate();
         var currentTeamColor = getTeamTurn();
         ChessPiece selectedPiece = boardInstance.getPiece(move.getStartPosition());
         if (selectedPiece == null) {
@@ -60,6 +93,7 @@ public class ChessGameImpl implements ChessGame {
             throw new InvalidMoveException();
         }
         Collection<ChessMove> validMoves = selectedPiece.pieceMoves(boardInstance, move.getStartPosition());
+        validMoves.removeIf(validMove -> !isSafeMove(boardInstance, currentTeamColor, validMove));
         boolean isValid = false;
         for (ChessMove validMove : validMoves) {
             if (validMove.getEndPosition().getColumn() == move.getEndPosition().getColumn() && validMove.getEndPosition().getRow() == move.getEndPosition().getRow()) {
@@ -72,11 +106,53 @@ public class ChessGameImpl implements ChessGame {
         if (!isValid) {
             throw new InvalidMoveException();
         }
+        // make the move
+        boardInstance.movePiece(move.getStartPosition(), move.getEndPosition());
+        // castle
+        boolean castled = false;
+        if (selectedPiece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (Math.abs(move.getStartPosition().getColumn() - move.getEndPosition().getColumn()) > 1) {
+                if (move.getEndPosition().getColumn() == 3) {
+                    // move left knight
+                    boardInstance.removePiece(new ChessPositionImpl(move.getEndPosition().getRow(), 1));
+                    boardInstance.addPiece(new ChessPositionImpl(move.getEndPosition().getRow(), 4), new Rook(selectedPiece.getTeamColor()));
+                    castled = true;
+                } else {
+                    // move right knight
+                    boardInstance.removePiece(new ChessPositionImpl(move.getEndPosition().getRow(), 8));
+                    boardInstance.addPiece(new ChessPositionImpl(move.getEndPosition().getRow(), 6), new Rook(selectedPiece.getTeamColor()));
+                    castled = true;
+                }
+            }
+        }
+        if (isInCheck(currentTeamColor)) {
+            // move it back
+            setBoard(beforeMove);
+            throw new InvalidMoveException();
+        }
+        if (castled) {
+            if (currentTeamColor == TeamColor.WHITE) {
+                boardInstance.whiteRightCastlePossible = false;
+                boardInstance.whiteLeftCastlePossible = false;
+            }
+        }
+        // promotion
+        if (move.getPromotionPiece() != null) {
+            switch (move.getPromotionPiece()) {
+                case QUEEN -> boardInstance.addPiece(move.getEndPosition(), new Queen(currentTeamColor));
+                case BISHOP -> boardInstance.addPiece(move.getEndPosition(), new Bishop(currentTeamColor));
+                case KNIGHT -> boardInstance.addPiece(move.getEndPosition(), new Knight(currentTeamColor));
+                case ROOK -> boardInstance.addPiece(move.getEndPosition(), new Rook(currentTeamColor));
+                default -> boardInstance.addPiece(move.getEndPosition(), new Pawn(currentTeamColor));
+
+            }
+        }
+
         // disable possible moves
-        // castling
+        // a. disable castling
         var selectedPieceType = selectedPiece.getPieceType();
         if (selectedPieceType == ChessPiece.PieceType.KING) {
-            if (selectedPiece.getTeamColor() == TeamColor.WHITE) {
+            if (currentTeamColor == TeamColor.WHITE) {
                 boardInstance.whiteLeftCastlePossible = false;
                 boardInstance.whiteRightCastlePossible = false;
             } else {
@@ -84,7 +160,7 @@ public class ChessGameImpl implements ChessGame {
                 boardInstance.blackRightCastlePossible = false;
             }
         } else if (selectedPieceType == ChessPiece.PieceType.ROOK) {
-            if (selectedPiece.getTeamColor() == TeamColor.WHITE) {
+            if (currentTeamColor == TeamColor.WHITE) {
                 if (move.getStartPosition().getRow() == 1) {
                     if (move.getStartPosition().getColumn() == 1) {
                         boardInstance.whiteLeftCastlePossible = false;
@@ -102,24 +178,7 @@ public class ChessGameImpl implements ChessGame {
                 }
             }
         }
-
-        boardInstance.movePiece(move.getStartPosition(), move.getEndPosition());
-        if (isInCheck(currentTeamColor)) {
-            // move it back
-            boardInstance.movePiece(move.getEndPosition(), move.getStartPosition());
-            throw new InvalidMoveException();
-        }
-        if (move.getPromotionPiece() != null) {
-            switch (move.getPromotionPiece()) {
-                case QUEEN -> boardInstance.addPiece(move.getEndPosition(), new Queen(currentTeamColor));
-                case BISHOP -> boardInstance.addPiece(move.getEndPosition(), new Bishop(currentTeamColor));
-                case KNIGHT -> boardInstance.addPiece(move.getEndPosition(), new Knight(currentTeamColor));
-                case ROOK -> boardInstance.addPiece(move.getEndPosition(), new Rook(currentTeamColor));
-                default -> boardInstance.addPiece(move.getEndPosition(), new Pawn(currentTeamColor));
-
-            }
-
-        }
+        // switch turns
         setTeamTurn(currentTeamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
@@ -135,54 +194,8 @@ public class ChessGameImpl implements ChessGame {
         if (kingPosition == null) {
             return false;
         }
-        var perpetrators = positionInDanger(kingPosition, teamColor);
+        var perpetrators = boardInstance.positionInDanger(kingPosition, teamColor);
         return !perpetrators.isEmpty();
-    }
-
-    private Collection<ChessPosition> positionInDanger(ChessPosition testPosition, TeamColor teamColor) {
-        HashSet<ChessPosition> perpetrators = new HashSet<>();
-        // ensure that the position being tested is attackable
-        boolean addedPiece = false;
-        ChessPiece replacedPiece = null;
-        if (boardInstance.getPiece(testPosition) == null) {
-            boardInstance.addPiece(testPosition, new Pawn(teamColor));
-            addedPiece = true;
-        } else if (boardInstance.getPiece(testPosition).getTeamColor() != teamColor) {
-            var oppositeColor = boardInstance.getPiece(testPosition).getTeamColor();
-            var existingPiece = boardInstance.getPiece(testPosition);
-            switch (existingPiece.getPieceType()) {
-                case KING -> replacedPiece = new King(oppositeColor);
-                case QUEEN -> replacedPiece = new Queen(oppositeColor);
-                case ROOK -> replacedPiece = new Rook(oppositeColor);
-                case BISHOP -> replacedPiece = new Bishop(oppositeColor);
-                case KNIGHT -> replacedPiece = new Knight(oppositeColor);
-                default -> replacedPiece = new Pawn(oppositeColor);
-            }
-            boardInstance.addPiece(testPosition, new Pawn(teamColor));
-        }
-        // evaluate potential attacks
-        for (int row = 1; row <= 8; row++) {
-            for (int col = 1; col <= 8; col++) {
-                var position = new ChessPositionImpl(row, col);
-                var foundPiece = boardInstance.getPiece(position);
-                if (foundPiece != null) {
-                    if (foundPiece.getTeamColor() != teamColor) {
-                        var validMoves = foundPiece.pieceMoves(boardInstance, position);
-                        for (ChessMove validMove : validMoves) {
-                            if (validMove.getEndPosition().getRow() == testPosition.getRow() && validMove.getEndPosition().getColumn() == testPosition.getColumn()) {
-                                perpetrators.add(position);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (addedPiece) {
-            boardInstance.removePiece(testPosition);
-        } else if (replacedPiece != null) {
-            boardInstance.addPiece(testPosition, replacedPiece);
-        }
-        return perpetrators;
     }
 
     private ChessPosition findKingPosition(TeamColor teamColor) {
@@ -215,7 +228,7 @@ public class ChessGameImpl implements ChessGame {
                 var newPosition = new ChessPositionImpl(row, col);
                 var foundPiece = boardInstance.getPiece(newPosition);
                 if (foundPiece == null || foundPiece.getTeamColor() != teamColor) {
-                    var perpetrators = positionInDanger(newPosition, teamColor);
+                    var perpetrators = boardInstance.positionInDanger(newPosition, teamColor);
                     if (perpetrators.isEmpty()) {
                         return false;
                     }
@@ -223,11 +236,11 @@ public class ChessGameImpl implements ChessGame {
             }
         }
         // check for assassination
-        var perpetrators = positionInDanger(kingPosition, teamColor);
+        var perpetrators = boardInstance.positionInDanger(kingPosition, teamColor);
         if (perpetrators.size() == 1) {
             // escape by assassination might be possible
             for (var perpetrator : perpetrators) {
-                var assassins = positionInDanger(perpetrator, teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+                var assassins = boardInstance.positionInDanger(perpetrator, teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
                 if (!assassins.isEmpty()) {
                     if (assassins.size() > 1) {
                         // assassination is possible!
@@ -303,7 +316,7 @@ public class ChessGameImpl implements ChessGame {
             for (int col = Math.max(kingPosition.getColumn() - 1, 1); col <= Math.min(kingPosition.getColumn() + 1, 8); col++) {
                 if (kingPosition.getRow() != row || kingPosition.getColumn() != col) {
                     var position = new ChessPositionImpl(row, col);
-                    if (positionInDanger(position, teamColor).isEmpty()) {
+                    if (boardInstance.positionInDanger(position, teamColor).isEmpty()) {
                         return false;
                     }
                 }

@@ -34,7 +34,7 @@ public abstract class ChessPieceImpl implements ChessPiece {
     abstract public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition);
 
 
-    public boolean isSafeMove(ChessBoardImpl board, ChessGame.TeamColor currentTurn, ChessMove potentialMove) {
+    public static boolean isSafeMove(ChessBoardImpl board, ChessGame.TeamColor currentTurn, ChessMove potentialMove) {
         var fakeGame = new ChessGameImpl();
         var boardCopy = board.duplicate();
         fakeGame.setBoard(boardCopy);
@@ -50,9 +50,24 @@ public abstract class ChessPieceImpl implements ChessPiece {
             case KNIGHT -> replacedPiece = new Knight(currentTurn);
             default -> replacedPiece = new Pawn(currentTurn);
         }
+        // castling
+        if (selectedPiece.getPieceType() == PieceType.KING) {
+            if (Math.abs(potentialMove.getStartPosition().getColumn() - potentialMove.getEndPosition().getColumn()) > 1) {
+                if (potentialMove.getEndPosition().getColumn() == 3) {
+                    // move left knight
+                    boardCopy.removePiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 1));
+                    boardCopy.addPiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 4), new Rook(selectedPiece.getTeamColor()));
+                } else {
+                    // move right knight
+                    boardCopy.removePiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 8));
+                    boardCopy.addPiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 6), new Rook(selectedPiece.getTeamColor()));
+                }
+            }
+        }
         boardCopy.removePiece(potentialMove.getStartPosition());
         boardCopy.addPiece(potentialMove.getEndPosition(), replacedPiece);
         // check to see if king is in check
-        return fakeGame.isInCheck(currentTurn);
+        boolean dangerous = fakeGame.isInCheck(currentTurn);
+        return !dangerous;
     }
 }

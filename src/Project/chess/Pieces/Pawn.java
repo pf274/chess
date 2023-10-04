@@ -71,7 +71,6 @@ public class Pawn extends ChessPieceImpl {
                 validMoves.add(new ChessMoveImpl(myPosition, doubleForwardPosition, null));
             }
         }
-        validMoves.removeIf(validMove -> !isSafeMove((ChessBoardImpl) board, color, validMove));
         return validMoves;
     }
 

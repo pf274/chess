@@ -57,8 +57,6 @@ public class Rook extends ChessPieceImpl {
                 }
             }
         }
-        // TODO: add castling moves
-        validMoves.removeIf(validMove -> !isSafeMove((ChessBoardImpl) board, color, validMove));
         return validMoves;
     }
 }
