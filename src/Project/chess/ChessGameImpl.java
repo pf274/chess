@@ -106,6 +106,20 @@ public class ChessGameImpl implements ChessGame {
         if (!isValid) {
             throw new InvalidMoveException();
         }
+        // en passant
+        var selectedPieceType = selectedPiece.getPieceType();
+        if (selectedPieceType == ChessPiece.PieceType.PAWN) {
+            if (Math.abs(move.getStartPosition().getRow() - move.getEndPosition().getRow()) > 1) {
+                // pawn moving two spaces! set the enPassantMove to the space in between
+                boardInstance.enPassantMove = new ChessPositionImpl((move.getStartPosition().getRow() + move.getEndPosition().getRow()) / 2, move.getEndPosition().getColumn());
+            } else {
+                boardInstance.enPassantMove = null;
+                if (move.getEndPosition().getColumn() != move.getStartPosition().getColumn() && boardInstance.getPiece(move.getEndPosition()) == null) {
+                    // doing en passant move!
+                    boardInstance.removePiece(new ChessPositionImpl(move.getStartPosition().getRow(), move.getEndPosition().getColumn()));
+                }
+            }
+        }
         // make the move
         boardInstance.movePiece(move.getStartPosition(), move.getEndPosition());
         // castle
@@ -150,7 +164,6 @@ public class ChessGameImpl implements ChessGame {
 
         // disable possible moves
         // a. disable castling
-        var selectedPieceType = selectedPiece.getPieceType();
         if (selectedPieceType == ChessPiece.PieceType.KING) {
             if (currentTeamColor == TeamColor.WHITE) {
                 boardInstance.whiteLeftCastlePossible = false;

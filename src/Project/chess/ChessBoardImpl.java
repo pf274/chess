@@ -13,6 +13,8 @@ public class ChessBoardImpl implements ChessBoard {
     public boolean blackLeftCastlePossible = true;
     public boolean blackRightCastlePossible = true;
 
+    public ChessPosition enPassantMove = null;
+
     private ChessPieceImpl[][] board = new ChessPieceImpl[8][8];
 
     public ChessBoardImpl duplicate() {

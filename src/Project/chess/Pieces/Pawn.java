@@ -31,10 +31,12 @@ public class Pawn extends ChessPieceImpl {
                 }
             }
         }
+        ChessBoardImpl boardImpl = (ChessBoardImpl) board;
         // assess forward left position
         if (forwardLeftPosition.getRow() >= 1 && forwardLeftPosition.getRow() <= 8 && forwardLeftPosition.getColumn() >= 1) {
-            if (board.getPiece(forwardLeftPosition) != null) {
-                if (board.getPiece(forwardLeftPosition).getTeamColor() != color) {
+            boolean isEnPassantMove = boardImpl.enPassantMove != null && boardImpl.enPassantMove.getRow() == forwardLeftPosition.getRow() && boardImpl.enPassantMove.getColumn() == forwardLeftPosition.getColumn();
+            if (board.getPiece(forwardLeftPosition) != null || isEnPassantMove) {
+                if (isEnPassantMove || board.getPiece(forwardLeftPosition).getTeamColor() != color) {
                     boolean hasReachedEndWhite = forwardLeftPosition.getRow() == 8 && color == ChessGame.TeamColor.WHITE;
                     boolean hasReachedEndBlack = forwardLeftPosition.getRow() == 1 && color == ChessGame.TeamColor.BLACK;
                     if (hasReachedEndWhite || hasReachedEndBlack) {
@@ -50,8 +52,9 @@ public class Pawn extends ChessPieceImpl {
         }
         // assess forward right position
         if (forwardRightPosition.getRow() >= 1 && forwardRightPosition.getRow() <= 8 && forwardRightPosition.getColumn() <= 8) {
-            if (board.getPiece(forwardRightPosition) != null) {
-                if (board.getPiece(forwardRightPosition).getTeamColor() != color) {
+            boolean isEnPassantMove = boardImpl.enPassantMove != null && boardImpl.enPassantMove.getRow() == forwardRightPosition.getRow() && boardImpl.enPassantMove.getColumn() == forwardRightPosition.getColumn();
+            if (board.getPiece(forwardRightPosition) != null || isEnPassantMove) {
+                if (isEnPassantMove || board.getPiece(forwardRightPosition).getTeamColor() != color) {
                     boolean hasReachedEndWhite = forwardRightPosition.getRow() == 8 && color == ChessGame.TeamColor.WHITE;
                     boolean hasReachedEndBlack = forwardRightPosition.getRow() == 1 && color == ChessGame.TeamColor.BLACK;
                     if (hasReachedEndWhite || hasReachedEndBlack) {
