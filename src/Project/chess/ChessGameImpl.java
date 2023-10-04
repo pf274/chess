@@ -130,13 +130,12 @@ public class ChessGameImpl implements ChessGame {
                     // move left knight
                     boardInstance.removePiece(new ChessPositionImpl(move.getEndPosition().getRow(), 1));
                     boardInstance.addPiece(new ChessPositionImpl(move.getEndPosition().getRow(), 4), new Rook(selectedPiece.getTeamColor()));
-                    castled = true;
                 } else {
                     // move right knight
                     boardInstance.removePiece(new ChessPositionImpl(move.getEndPosition().getRow(), 8));
                     boardInstance.addPiece(new ChessPositionImpl(move.getEndPosition().getRow(), 6), new Rook(selectedPiece.getTeamColor()));
-                    castled = true;
                 }
+                castled = true;
             }
         }
         if (isInCheck(currentTeamColor)) {
@@ -236,6 +235,7 @@ public class ChessGameImpl implements ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         var kingPosition = findKingPosition(teamColor);
         // check all nine possible spots
+        assert kingPosition != null;
         for (int row = Math.max(1, kingPosition.getRow() - 1); row <= Math.min(kingPosition.getRow() + 1, 8); row++) {
             for (int col = Math.max(1, kingPosition.getColumn() - 1); col <= Math.min(kingPosition.getColumn() + 1, 8); col++) {
                 var newPosition = new ChessPositionImpl(row, col);
@@ -325,6 +325,7 @@ public class ChessGameImpl implements ChessGame {
         }
         // check if any of the king's moves are safe
         var kingPosition = findKingPosition(teamColor);
+        assert kingPosition != null;
         for (int row = Math.max(kingPosition.getRow() - 1, 1); row <= Math.min(kingPosition.getRow() + 1, 8); row++) {
             for (int col = Math.max(kingPosition.getColumn() - 1, 1); col <= Math.min(kingPosition.getColumn() + 1, 8); col++) {
                 if (kingPosition.getRow() != row || kingPosition.getColumn() != col) {
