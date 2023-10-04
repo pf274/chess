@@ -1,11 +1,11 @@
-package passoffTests.chessTests.chessPieceTests;
+package PassoffTests.ChessTests.ChessPieceTests;
 
 import chess.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import passoffTests.TestFactory;
+import PassoffTests.TestFactory;
 
 import java.util.HashSet;
 import java.util.Set;

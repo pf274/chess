@@ -1,6 +1,7 @@
-package passoffTests;
+package PassoffTests;
 
 import chess.*;
+import chess.Pieces.*;
 
 /**
  * Used for testing your code
@@ -11,28 +12,30 @@ public class TestFactory {
     //Chess Functions
     //------------------------------------------------------------------------------------------------------------------
     public static ChessBoard getNewBoard(){
-        // FIXME
-		return null;
+		return new ChessBoardImpl();
     }
 
     public static ChessGame getNewGame(){
-        // FIXME
-		return null;
+		return new ChessGameImpl();
     }
 
     public static ChessPiece getNewPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type){
-        // FIXME
-		return null;
+        return switch (type) {
+            case ROOK -> new Rook(pieceColor);
+            case BISHOP -> new Bishop(pieceColor);
+            case QUEEN -> new Queen(pieceColor);
+            case KNIGHT -> new Knight(pieceColor);
+            case KING -> new King(pieceColor);
+            default -> new Pawn(pieceColor);
+        };
     }
 
     public static ChessPosition getNewPosition(Integer row, Integer col){
-        // FIXME
-		return null;
+		return new ChessPositionImpl(row, col);
     }
 
     public static ChessMove getNewMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece){
-        // FIXME
-		return null;
+		return new ChessMoveImpl(startPosition, endPosition, promotionPiece);
     }
     //------------------------------------------------------------------------------------------------------------------
 
