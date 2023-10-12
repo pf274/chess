@@ -1,5 +1,8 @@
 package server.DAO;
 
+/**
+ * The interface for a data access object.
+ */
 public interface DAO {
 
     /**
