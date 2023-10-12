@@ -16,7 +16,7 @@ public class RegisterHandler extends HandlerBase {
 
 
     /**
-     * Creates a new RegisterHandler with the given DAOs.
+     * Creates a new RegisterHandler and defines its routes.
      * @param authDAO - an instance of AuthDAO created in the Server class
      * @param userDAO - an instance of UserDAO created in the Server class
      * @param gameDAO - an instance of GameDAO created in the Server class
@@ -24,24 +24,23 @@ public class RegisterHandler extends HandlerBase {
      */
     public RegisterHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) throws ClassNotFoundException {
         super(authDAO, userDAO, gameDAO, "RegisterService");
-    }
 
-    /**
-     * Registers a new user with the given username and password.
-     * @param username the user's username
-     * @param password the user's password
-     * @param email the user's email
-     * @return a success message
-     * @throws APIException if registering fails
-     */
-    public APIResponse register(String username, String password, String email) throws APIException {
-        try {
-            RegisterService registerService = (RegisterService) this.service;
-            registerService.register(username, password, email);
-            AuthToken authToken = new AuthToken(username);
-            return new RegisterResponse(username, authToken);
-        } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
-        }
+        // register
+        addRoute(new APIRoute(method.POST, "/user/register", parsedRequest -> {
+            try {
+                // get variables
+                String username = parsedRequest.getBody().get("username");
+                String password = parsedRequest.getBody().get("password");
+                String email = parsedRequest.getBody().get("email");
+                // run service
+                RegisterService registerService = (RegisterService) this.service;
+                registerService.register(username, password, email);
+                AuthToken authToken = new AuthToken(username);
+                // return response
+                return new RegisterResponse(username, authToken);
+            } catch (ServiceException e) {
+                throw new APIException(e.getMessage());
+            }
+        }));
     }
 }

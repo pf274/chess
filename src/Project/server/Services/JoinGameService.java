@@ -4,6 +4,9 @@ import server.DAO.AuthDAO;
 import server.DAO.DataAccessException;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
+import server.Models.User;
+
+import java.util.Objects;
 
 /**
  * Functionality for joining and leaving games
@@ -30,7 +33,8 @@ public class JoinGameService extends ServiceBase {
      */
     public void joinGame(int gameID, String username, String playerColor) throws ServiceException {
         try {
-            gameDAO.addUserToGame(gameID, username, playerColor);
+            User.Color color = Objects.equals(playerColor, "white") ? User.Color.WHITE : User.Color.BLACK;
+            gameDAO.addUserToGame(gameID, username, color);
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());
         }

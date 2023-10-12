@@ -4,6 +4,15 @@ package server.Models;
  * Represents a user
  */
 public class User {
+
+    /**
+     * The user's color
+     */
+    public enum Color {
+        BLACK,
+        WHITE
+    }
+
     /**
      * Creates a new user
      * @param username the user's username
@@ -15,14 +24,17 @@ public class User {
         this.password = password;
         this.email = email;
     }
+
     /**
      * The user's username
      */
     public String username;
+
     /**
      * The user's password
      */
     public String password;
+
     /**
      * The user's email
      */

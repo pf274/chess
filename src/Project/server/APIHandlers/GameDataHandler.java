@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class GameDataHandler extends HandlerBase {
 
     /**
-     * Creates a new GameDataHandler with the given DAOs.
+     * Creates a new GameDataHandler and defines its routes.
      * @param authDAO an instance of AuthDAO created in the Server class
      * @param userDAO an instance of UserDAO created in the Server class
      * @param gameDAO an instance of GameDAO created in the Server class
@@ -24,49 +24,46 @@ public class GameDataHandler extends HandlerBase {
      */
     public GameDataHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) throws ClassNotFoundException {
         super(authDAO, userDAO, gameDAO, "GameDataService");
-    }
 
-    /**
-     * Clears the database.
-     * @throws APIException if clearing the database fails
-     */
-    public APIResponse clearDatabase() throws APIException {
-        try {
-            GameDataService gameDataService = (GameDataService) this.service;
-            gameDataService.clear();
-            return new ClearDatabaseResponse(200, "Clear succeeded.");
-        } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
-        }
-    }
+        // list games
+        addRoute(new APIRoute(method.GET, "/game/list", parsedRequest -> {
+            try {
+                // run service
+                GameDataService gameDataService = (GameDataService) this.service;
+                ArrayList<Game> games = gameDataService.listGames();
+                // return successful response
+                return new ListGamesResponse(games);
+            } catch (ServiceException e) {
+                throw new APIException(e.getMessage());
+            }
+        }));
 
-    /**
-     * Lists all the games in the database.
-     * @return the list of games
-     * @throws APIException if listing the games fails
-     */
-    public APIResponse listGames() throws APIException {
-        try {
-            GameDataService gameDataService = (GameDataService) this.service;
-            ArrayList<Game> games = gameDataService.listGames();
-            return new ListGamesResponse(games);
-        } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
-        }
-    }
+        // clear database
+        addRoute(new APIRoute(method.DELETE, "/game/clear", parsedRequest -> {
+            try {
+                // run service
+                GameDataService gameDataService = (GameDataService) this.service;
+                gameDataService.clear();
+                // return successful response
+                return new ClearDatabaseResponse();
+            } catch (ServiceException e) {
+                throw new APIException(e.getMessage());
+            }
+        }));
 
-    /**
-     * Creates a new game
-     * @return details about the created game
-     * @throws APIException if creating the game fails
-     */
-    public APIResponse createGame(String gameName) throws APIException {
-    	try {
-            GameDataService gameDataService = (GameDataService) this.service;
-            Game newGame = gameDataService.createGame(gameName);
-            return new CreateGameResponse(newGame.gameID);
-        } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
-        }
+        // create game
+        addRoute(new APIRoute(method.POST, "/game/create", parsedRequest -> {
+            try {
+                // get variables
+                String gameName = parsedRequest.getBody().get("gameName");
+                // run service
+                GameDataService gameDataService = (GameDataService) this.service;
+                Game newGame = gameDataService.createGame(gameName);
+                // return successful response
+                return new CreateGameResponse(newGame.gameID);
+            } catch (ServiceException e) {
+                throw new APIException(e.getMessage());
+            }
+        }));
     }
 }

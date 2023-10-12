@@ -4,16 +4,20 @@ package server.Services;
  * Exception thrown when a service encounters an error
  */
 public class ServiceException extends Exception {
-    int statusCode;
+    /**
+     * Creates a new ServiceException with the given message and status code.
+     * @param statusCode the status code
+     * @param message the error message
+     */
     public ServiceException(int statusCode, String message) {
         super(statusCode + " " + message);
     }
 
     /**
-     * Gets the status code of the error
-     * @return the status code
+     * Creates a new ServiceException with the given message.
+     * @param message the error message
      */
-    public int getStatusCode() {
-        return statusCode;
+    public ServiceException(String message) {
+        super(message);
     }
 }

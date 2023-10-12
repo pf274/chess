@@ -3,16 +3,35 @@ package server.APIHandlers;
 import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
+import server.ParsedRequest;
+import server.Responses.APIResponse;
+import server.Responses.ExceptionResponse;
 import server.Services.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 /**
  * A base class to define common API handler functionality.
  */
 public class HandlerBase {
 
+    public ArrayList<APIRoute> routes = new ArrayList<>();
+
+    public void addRoute(APIRoute route) {
+        routes.add(route);
+    }
+
+    /**
+     * An enum to define the HTTP methods.
+     */
+    public enum method {
+        PUT,
+        POST,
+        GET,
+        DELETE
+    }
     public ServiceBase service = null;
 
     /**
@@ -36,5 +55,23 @@ public class HandlerBase {
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    public APIResponse handleRequest(ParsedRequest request) throws APIException {
+        for (APIRoute route : routes) {
+            if (route.getMethod() == request.getMethod() && route.getPath().equals(request.getPath())) {
+                return route.handle(request);
+            }
+        }
+        return new ExceptionResponse(404, "Not found.");
+    }
+
+    public boolean hasRoute(method method, String path) {
+        for (APIRoute route : routes) {
+            if (route.getMethod() == method && route.getPath().equals(path)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

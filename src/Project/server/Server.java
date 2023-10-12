@@ -1,11 +1,14 @@
 package server;
 
+import com.sun.net.httpserver.HttpExchange;
 import server.APIHandlers.*;
 import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
 import server.Responses.APIResponse;
 import server.Responses.ExceptionResponse;
+
+import java.net.http.HttpRequest;
 
 /**
  * This class is used to route the API requests to the appropriate handler.
@@ -52,24 +55,50 @@ public class Server {
      * @throws ClassNotFoundException if a service class is not found (should never happen)
      */
     public Server() throws ClassNotFoundException {
+        // TODO: start the server
     }
 
     /**
      * This method is used to route the API requests to the appropriate handler.
      * If an APIException is thrown, this method will catch it and return an ExceptionResponse, which is a child of APIResponse.
-     * @param request the API request
+     * @param exchange the http exchange
      * @return an API response
      */
-    public APIResponse apiRouter(String request) {
+    public APIResponse apiRouter(HttpExchange exchange) {
         try {
-            // TODO: handle routes
+            ParsedRequest parsedRequest = new ParsedRequest(exchange);
+            String path = parsedRequest.getPath();
+            HandlerBase.method method = parsedRequest.getMethod();
+            if (gameDataHandler.hasRoute(method, path)) {
+                return gameDataHandler.handleRequest(parsedRequest);
+            }
+            if (loginHandler.hasRoute(method, path)) {
+                return loginHandler.handleRequest(parsedRequest);
+            }
+            if (joinGameHandler.hasRoute(method, path)) {
+                return joinGameHandler.handleRequest(parsedRequest);
+            }
+            if (registerHandler.hasRoute(method, path)) {
+                return registerHandler.handleRequest(parsedRequest);
+            }
+            return new ExceptionResponse(404, "Not found.");
         } catch (APIException e) {
-            String message = e.getMessage();
-            int firstSpace = message.indexOf(" ");
-            int status = Integer.parseInt(message.substring(0, firstSpace));
-            String description = message.substring(firstSpace + 1);
-            return new ExceptionResponse(status, description);
+            return handleException(e);
         }
+    }
+
+    /**
+     * Converts an Exception into an ExceptionResponse.
+     * @param exception the exception
+     * @return an ExceptionResponse
+     */
+    private static ExceptionResponse handleException(Exception exception) {
+        // convert the error message into an API response
+        String message = exception.getMessage();
+        int firstSpace = message.indexOf(" ");
+        int status = Integer.parseInt(message.substring(0, firstSpace));
+        String description = message.substring(firstSpace + 1);
+        return new ExceptionResponse(status, description);
     }
 
 }

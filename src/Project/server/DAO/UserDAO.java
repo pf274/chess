@@ -8,6 +8,7 @@ import java.util.ArrayList;
  * The UserDAO class is responsible for storing and retrieving User objects from the database
  */
 public class UserDAO implements DAO {
+
     /**
      * The list of users.
      */

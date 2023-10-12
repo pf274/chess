@@ -6,8 +6,7 @@ package server.Responses;
 public class CreateGameResponse extends APIResponse {
     /**
      * Creates a new CreateGameResponse
-     * @param statusCode The status code
-     * @param statusMessage The status message
+     * @param gameID The ID of the game that was created
      */
     public CreateGameResponse(int gameID) {
         super(200, "{ \"gameID\": " + gameID + " }");

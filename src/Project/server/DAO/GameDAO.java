@@ -1,6 +1,7 @@
 package server.DAO;
 
 import server.Models.Game;
+import server.Models.User;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -9,6 +10,7 @@ import java.util.Objects;
  * The GameDAO class is responsible for storing and retrieving Game objects from the database
  */
 public class GameDAO implements DAO {
+
     /**
      * The list of games.
      */
@@ -144,17 +146,30 @@ public class GameDAO implements DAO {
         throw new DataAccessException("User " + username + " not found in game " + gameID);
     }
 
-    public void addUserToGame(int gameID, String username, String playerColor) throws DataAccessException {
+    /**
+     * Adds a user to a game.
+     * @param gameID the game ID
+     * @param username the username
+     * @param playerColor the player color
+     * @throws DataAccessException if the game does not exist or if the color is already in use.
+     */
+    public void addUserToGame(int gameID, String username, User.Color playerColor) throws DataAccessException {
         for (var game : games) {
             if (game.gameID == gameID) {
-                if (playerColor.equals("WHITE")) {
-                    game.whiteUsername = username;
-                    return;
-                } else if (playerColor.equals("BLACK")) {
-                    game.blackUsername = username;
-                    return;
+                if (playerColor.equals(User.Color.WHITE)) {
+                    if (game.whiteUsername == null) {
+                        game.whiteUsername = username;
+                        return;
+                    } else {
+                        throw new DataAccessException("White player already exists");
+                    }
                 } else {
-                    throw new DataAccessException("Invalid player color " + playerColor);
+                    if (game.blackUsername == null) {
+                        game.blackUsername = username;
+                        return;
+                    } else {
+                        throw new DataAccessException("Black player already exists");
+                    }
                 }
             }
         }

@@ -59,7 +59,6 @@ public class GameDataService extends ServiceBase {
      */
     public Game createGame(String gameName) throws ServiceException {
         try {
-            // TODO: Better game ID generation
             return gameDAO.addGame(gameName);
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());
