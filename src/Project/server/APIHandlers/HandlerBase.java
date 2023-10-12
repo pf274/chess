@@ -17,8 +17,15 @@ import java.util.ArrayList;
  */
 public class HandlerBase {
 
-    public ArrayList<APIRoute> routes = new ArrayList<>();
+    /**
+     * A list of routes that this handler will handle.
+     */
+    private final ArrayList<APIRoute> routes = new ArrayList<>();
 
+    /**
+     * Adds a route to the list of routes.
+     * @param route the route to add
+     */
     public void addRoute(APIRoute route) {
         routes.add(route);
     }
@@ -32,31 +39,14 @@ public class HandlerBase {
         GET,
         DELETE
     }
-    public ServiceBase service = null;
+
 
     /**
-     * Creates a new Handler with the given DAOs and service class name.
-     * @param authDAO an instance of AuthDAO created in the Server class
-     * @param userDAO an instance of UserDAO created in the Server class
-     * @param gameDAO an instance of GameDAO created in the Server class
-     * @param serviceClassName the fully qualified name of the service class
-     * @throws ClassNotFoundException if the service class is not found
+     * Handles a request by finding the correct route and running the service.
+     * @param request the request to handle
+     * @return the response to the request
+     * @throws APIException if the request could not be handled or if the route does not exist.
      */
-    public HandlerBase(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO, String serviceClassName) throws ClassNotFoundException {
-        try {
-            // Get the class object for the specified service
-            Class<?> serviceClass = Class.forName(serviceClassName);
-
-            // Get the constructor that accepts the DAO instances
-            Constructor<?> constructor = serviceClass.getConstructor(AuthDAO.class, UserDAO.class, GameDAO.class);
-
-            // Create an instance of the service class
-            this.service = (ServiceBase) constructor.newInstance(authDAO, userDAO, gameDAO);
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-    }
-
     public APIResponse handleRequest(ParsedRequest request) throws APIException {
         for (APIRoute route : routes) {
             if (route.getMethod() == request.getMethod() && route.getPath().equals(request.getPath())) {
@@ -66,6 +56,12 @@ public class HandlerBase {
         return new ExceptionResponse(404, "Not found.");
     }
 
+    /**
+     * Checks if this handler has a route with the given method and path.
+     * @param method the method to check
+     * @param path the path to check
+     * @return whether the handler has a route with the given method and path
+     */
     public boolean hasRoute(method method, String path) {
         for (APIRoute route : routes) {
             if (route.getMethod() == method && route.getPath().equals(path)) {

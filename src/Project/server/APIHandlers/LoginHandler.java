@@ -7,6 +7,7 @@ import server.Models.AuthToken;
 import server.Responses.APIResponse;
 import server.Responses.LoginResponse;
 import server.Responses.LogoutResponse;
+import server.Services.GameDataService;
 import server.Services.LoginService;
 import server.Services.ServiceException;
 
@@ -15,16 +16,20 @@ import server.Services.ServiceException;
  */
 public class LoginHandler extends HandlerBase {
 
+    /**
+     * The service instance that this handler will use to handle requests.
+     */
+    private final LoginService service;
 
     /**
      * Creates a new LoginHandler and defines its routes.
      * @param authDAO an instance of AuthDAO created in the Server class
      * @param userDAO an instance of UserDAO created in the Server class
      * @param gameDAO an instance of GameDAO created in the Server class
-     * @throws ClassNotFoundException if the service class is not found
      */
-    public LoginHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) throws ClassNotFoundException {
-        super(authDAO, userDAO, gameDAO, "LoginService");
+    public LoginHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
+
+        this.service = new LoginService(authDAO, userDAO, gameDAO);
 
         // login
         addRoute(new APIRoute(method.POST, "/user/login", parsedRequest -> {
@@ -33,8 +38,7 @@ public class LoginHandler extends HandlerBase {
                 String username = parsedRequest.getBody().get("username");
                 String password = parsedRequest.getBody().get("password");
                 // run service
-                LoginService loginService = (LoginService) this.service;
-                AuthToken authToken = loginService.login(username, password);
+                AuthToken authToken = this.service.login(username, password);
                 // return response
                 if (authToken == null) {
                     return new APIResponse(401, "Error: unauthorized");
@@ -51,8 +55,7 @@ public class LoginHandler extends HandlerBase {
                 // get variables
                 String username = parsedRequest.getBody().get("username");
                 // run service
-                LoginService loginService = (LoginService) this.service;
-                loginService.logout(username);
+                this.service.logout(username);
                 // return successful response
                 return new LogoutResponse();
             } catch (ServiceException e) {

@@ -14,23 +14,25 @@ import java.util.ArrayList;
  * This class is used to handle the API requests that are related to game data, such as resetting the database.
  */
 public class GameDataHandler extends HandlerBase {
+    /**
+     * The service instance that this handler will use to handle requests.
+     */
+    private final GameDataService service;
 
     /**
      * Creates a new GameDataHandler and defines its routes.
      * @param authDAO an instance of AuthDAO created in the Server class
      * @param userDAO an instance of UserDAO created in the Server class
      * @param gameDAO an instance of GameDAO created in the Server class
-     * @throws ClassNotFoundException if the service class is not found
      */
-    public GameDataHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) throws ClassNotFoundException {
-        super(authDAO, userDAO, gameDAO, "GameDataService");
+    public GameDataHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
+        this.service = new GameDataService(authDAO, userDAO, gameDAO);
 
         // list games
         addRoute(new APIRoute(method.GET, "/game/list", parsedRequest -> {
             try {
                 // run service
-                GameDataService gameDataService = (GameDataService) this.service;
-                ArrayList<Game> games = gameDataService.listGames();
+                ArrayList<Game> games = this.service.listGames();
                 // return successful response
                 return new ListGamesResponse(games);
             } catch (ServiceException e) {
@@ -42,8 +44,7 @@ public class GameDataHandler extends HandlerBase {
         addRoute(new APIRoute(method.DELETE, "/game/clear", parsedRequest -> {
             try {
                 // run service
-                GameDataService gameDataService = (GameDataService) this.service;
-                gameDataService.clear();
+                this.service.clear();
                 // return successful response
                 return new ClearDatabaseResponse();
             } catch (ServiceException e) {
@@ -57,8 +58,7 @@ public class GameDataHandler extends HandlerBase {
                 // get variables
                 String gameName = parsedRequest.getBody().get("gameName");
                 // run service
-                GameDataService gameDataService = (GameDataService) this.service;
-                Game newGame = gameDataService.createGame(gameName);
+                Game newGame = this.service.createGame(gameName);
                 // return successful response
                 return new CreateGameResponse(newGame.gameID);
             } catch (ServiceException e) {

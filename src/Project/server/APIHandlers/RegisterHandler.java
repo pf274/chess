@@ -14,16 +14,19 @@ import server.Services.ServiceException;
  */
 public class RegisterHandler extends HandlerBase {
 
+    /**
+     * The service instance that this handler will use to handle requests.
+     */
+    private final RegisterService service;
 
     /**
      * Creates a new RegisterHandler and defines its routes.
      * @param authDAO - an instance of AuthDAO created in the Server class
      * @param userDAO - an instance of UserDAO created in the Server class
      * @param gameDAO - an instance of GameDAO created in the Server class
-     * @throws ClassNotFoundException if the service class is not found
      */
-    public RegisterHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) throws ClassNotFoundException {
-        super(authDAO, userDAO, gameDAO, "RegisterService");
+    public RegisterHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
+        this.service = new RegisterService(authDAO, userDAO, gameDAO);
 
         // register
         addRoute(new APIRoute(method.POST, "/user/register", parsedRequest -> {
@@ -33,8 +36,7 @@ public class RegisterHandler extends HandlerBase {
                 String password = parsedRequest.getBody().get("password");
                 String email = parsedRequest.getBody().get("email");
                 // run service
-                RegisterService registerService = (RegisterService) this.service;
-                registerService.register(username, password, email);
+                this.service.register(username, password, email);
                 AuthToken authToken = new AuthToken(username);
                 // return response
                 return new RegisterResponse(username, authToken);
