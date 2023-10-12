@@ -6,16 +6,6 @@ package server.Models;
 public class AuthToken {
 
     /**
-     * Creates a new auth token
-     * @param username the username associated with this auth token
-     */
-    public AuthToken(String username) {
-        // TODO: generate unique auth tokens
-        this.username = username;
-        this.authToken = "AUTHTOKEN" + username;
-    }
-
-    /**
      * The auth token string
      */
     public String authToken;
@@ -24,4 +14,14 @@ public class AuthToken {
      * The username associated with this auth token
      */
     public String username;
+
+    /**
+     * Creates a new auth token
+     * @param username the username associated with this auth token
+     */
+    public AuthToken(String username) {
+        // TODO: generate unique auth tokens
+        this.username = username;
+        this.authToken = "AUTHTOKEN" + username;
+    }
 }

@@ -1,7 +1,7 @@
 package server.Responses;
 
 /**
- * A response for when a game is created
+ * A response for when a game is created successfully
  */
 public class CreateGameResponse extends APIResponse {
     /**

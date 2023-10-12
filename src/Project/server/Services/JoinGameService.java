@@ -9,12 +9,11 @@ import server.Models.User;
 import java.util.Objects;
 
 /**
- * Functionality for joining and leaving games
+ * Services for joining and leaving games
  */
 public class JoinGameService extends ServiceBase {
     /**
      * Creates a new Service with the given DAOs.
-     *
      * @param authDAO an instance of AuthDAO created in the Server class
      * @param userDAO an instance of UserDAO created in the Server class
      * @param gameDAO an instance of GameDAO created in the Server class
@@ -25,7 +24,6 @@ public class JoinGameService extends ServiceBase {
 
     /**
      * Adds the user with the given username to the game with the given GameID.
-     *
      * @param gameID the ID of the game to join
      * @param username the username of the user to join
      * @param playerColor the color of the player

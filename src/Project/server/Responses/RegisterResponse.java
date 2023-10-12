@@ -3,7 +3,7 @@ package server.Responses;
 import server.Models.AuthToken;
 
 /**
- * A response for when a user registers
+ * A response for when a user registers successfully
  */
 public class RegisterResponse extends APIResponse {
     /**

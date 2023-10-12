@@ -1,7 +1,7 @@
 package server.Responses;
 
 /**
- * A response for when an APIException is thrown
+ * A response for when an exception is thrown
  */
 public class ExceptionResponse extends APIResponse {
     /**

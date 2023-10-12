@@ -13,7 +13,6 @@ import server.Models.User;
 public class LoginService extends ServiceBase {
     /**
      * Creates a new Service with the given DAOs.
-     *
      * @param authDAO an instance of AuthDAO created in the Server class
      * @param userDAO an instance of UserDAO created in the Server class
      * @param gameDAO an instance of GameDAO created in the Server class

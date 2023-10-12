@@ -1,7 +1,7 @@
 package server.Responses;
 
 /**
- * A response for when a user joins a game
+ * A response for when a user joins a game successfully
  */
 public class JoinGameResponse extends APIResponse {
     /**

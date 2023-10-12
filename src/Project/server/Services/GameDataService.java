@@ -9,13 +9,12 @@ import server.Models.Game;
 import java.util.ArrayList;
 
 /**
- * Functionality regarding game data
+ * Services dealing with game data
  */
 public class GameDataService extends ServiceBase {
 
     /**
      * Creates a new Service with the given DAOs.
-     *
      * @param authDAO an instance of AuthDAO created in the Server class
      * @param userDAO an instance of UserDAO created in the Server class
      * @param gameDAO an instance of GameDAO created in the Server class
@@ -55,7 +54,7 @@ public class GameDataService extends ServiceBase {
     /**
      * Creates a new game
      * @param gameName The name of the game
-     * @return The ID of the game
+     * @return The game
      */
     public Game createGame(String gameName) throws ServiceException {
         try {

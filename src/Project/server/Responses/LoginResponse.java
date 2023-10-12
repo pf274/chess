@@ -3,7 +3,7 @@ package server.Responses;
 import server.Models.AuthToken;
 
 /**
- * A response for when a user logs in
+ * A response for when a user logs in successfully
  */
 public class LoginResponse extends APIResponse {
     /**
@@ -12,6 +12,7 @@ public class LoginResponse extends APIResponse {
      * @param authToken The authToken of the user who logged in
      */
     public LoginResponse(String username, AuthToken authToken) {
+        // TODO: handle this
         super(200, "blah blah");
     }
 }

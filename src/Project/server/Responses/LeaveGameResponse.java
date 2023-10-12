@@ -1,7 +1,7 @@
 package server.Responses;
 
 /**
- * A response for when a user leaves a game
+ * A response for when a user leaves a game successfully
  */
 public class LeaveGameResponse extends APIResponse {
     /**

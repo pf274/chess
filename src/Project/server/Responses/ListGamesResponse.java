@@ -5,7 +5,7 @@ import server.Models.Game;
 import java.util.ArrayList;
 
 /**
- * A response for when a user lists games
+ * A response for when a user lists games successfully
  */
 public class ListGamesResponse extends APIResponse {
     /**
