@@ -32,7 +32,6 @@ public class ChessGameImpl implements ChessGame {
 
     /**
      * Gets a valid moves for a piece at the given location
-     *
      * @param startPosition the piece to get valid moves for
      * @return Set of valid moves for requested piece, or null if no piece at startPosition
      */
@@ -77,7 +76,6 @@ public class ChessGameImpl implements ChessGame {
 
     /**
      * Makes a move in a chess game
-     *
      * @param move chess move to perform
      * @throws InvalidMoveException if move is invalid
      */
@@ -151,14 +149,8 @@ public class ChessGameImpl implements ChessGame {
         }
         // promotion
         if (move.getPromotionPiece() != null) {
-            switch (move.getPromotionPiece()) {
-                case QUEEN -> boardInstance.addPiece(move.getEndPosition(), new Queen(currentTeamColor));
-                case BISHOP -> boardInstance.addPiece(move.getEndPosition(), new Bishop(currentTeamColor));
-                case KNIGHT -> boardInstance.addPiece(move.getEndPosition(), new Knight(currentTeamColor));
-                case ROOK -> boardInstance.addPiece(move.getEndPosition(), new Rook(currentTeamColor));
-                default -> boardInstance.addPiece(move.getEndPosition(), new Pawn(currentTeamColor));
-
-            }
+            ChessPieceImpl newPiece = (ChessPieceImpl) ChessPieceImpl.createPiece(move.getPromotionPiece(), currentTeamColor);
+            boardInstance.addPiece(move.getEndPosition(), newPiece);
         }
 
         // disable possible moves
@@ -196,7 +188,6 @@ public class ChessGameImpl implements ChessGame {
 
     /**
      * Determines if the given team is in check
-     *
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
@@ -227,7 +218,6 @@ public class ChessGameImpl implements ChessGame {
 
     /**
      * Determines if the given team is in checkmate
-     *
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
@@ -314,7 +304,6 @@ public class ChessGameImpl implements ChessGame {
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having no valid moves
-     *
      * @param teamColor which team to check for stalemate
      * @return True if the specified team is in stalemate, otherwise false
      */
@@ -354,7 +343,6 @@ public class ChessGameImpl implements ChessGame {
 
     /**
      * Sets this game's chessboard with a given board
-     *
      * @param board the new board to use
      */
     @Override
@@ -364,7 +352,6 @@ public class ChessGameImpl implements ChessGame {
 
     /**
      * Gets the current chessboard
-     *
      * @return the chessboard
      */
     @Override

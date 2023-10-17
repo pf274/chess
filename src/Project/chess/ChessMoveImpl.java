@@ -10,6 +10,12 @@ public class ChessMoveImpl implements ChessMove {
 
     ChessPiece.PieceType promotionPiece;
 
+    /**
+     * Constructor for a chess move
+     * @param startingPosition the starting position
+     * @param endingPosition the ending position
+     * @param promotionPiece the piece to promote to
+     */
     public ChessMoveImpl(ChessPosition startingPosition, ChessPosition endingPosition, ChessPiece.PieceType promotionPiece) {
         this.startingPosition = startingPosition;
         this.endingPosition = endingPosition;
@@ -33,7 +39,6 @@ public class ChessMoveImpl implements ChessMove {
 
     /**
      * Gets the type of piece to promote a pawn to if pawn promotion is part of this chess move
-     *
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     @Override

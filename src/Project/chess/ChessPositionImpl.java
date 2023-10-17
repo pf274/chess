@@ -39,6 +39,11 @@ public class ChessPositionImpl implements ChessPosition {
         return column;
     }
 
+    /**
+     * Constructor for a chess position
+     * @param row the row
+     * @param column the column
+     */
     public ChessPositionImpl(int row, int column) {
         this.row = row;
         this.column = column;

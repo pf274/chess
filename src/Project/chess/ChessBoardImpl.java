@@ -12,11 +12,13 @@ public class ChessBoardImpl implements ChessBoard {
     public boolean whiteRightCastlePossible = true;
     public boolean blackLeftCastlePossible = true;
     public boolean blackRightCastlePossible = true;
-
     public ChessPosition enPassantMove = null;
-
     private ChessPieceImpl[][] board = new ChessPieceImpl[8][8];
 
+    /**
+     * Creates a copy of the chess board
+     * @return a copy of the chess board
+     */
     public ChessBoardImpl duplicate() {
         var newBoard = new ChessBoardImpl();
         for (int row = 1; row <= 8; row++) {
@@ -24,15 +26,7 @@ public class ChessBoardImpl implements ChessBoard {
                 var position = new ChessPositionImpl(row, col);
                 var piece = getPiece(position);
                 if (piece != null) {
-                    ChessPieceImpl newPiece;
-                    switch (piece.getPieceType()) {
-                        case ROOK -> newPiece = new Rook(piece.getTeamColor());
-                        case KING -> newPiece = new King(piece.getTeamColor());
-                        case QUEEN -> newPiece = new Queen(piece.getTeamColor());
-                        case BISHOP -> newPiece = new Bishop(piece.getTeamColor());
-                        case KNIGHT -> newPiece = new Knight(piece.getTeamColor());
-                        default -> newPiece = new Pawn(piece.getTeamColor());
-                    }
+                    ChessPieceImpl newPiece = (ChessPieceImpl) ChessPieceImpl.createPiece(piece.getPieceType(), piece.getTeamColor());
                     newBoard.addPiece(position, newPiece);
                 }
             }
@@ -40,17 +34,26 @@ public class ChessBoardImpl implements ChessBoard {
         return newBoard;
     }
 
-    public ChessBoardImpl() {}
-
+    /**
+     * Gets the board
+     * @return the board
+     */
     public ChessPieceImpl[][] getBoard() {
         return board;
     }
 
+    /**
+     * Sets the board to a specified board
+     * @param board the board to set to
+     */
     public void setBoard(ChessPiece[][] board) {
         this.board = (ChessPieceImpl[][]) board;
         initializeCastling();
     }
 
+    /**
+     * Initializes the castling variables
+     */
     private void initializeCastling() {
         var whiteLeftRook = board[0][0];
         var whiteLeftRookGood = whiteLeftRook != null && whiteLeftRook.getPieceType() == ChessPiece.PieceType.ROOK && whiteLeftRook.getTeamColor() == ChessGame.TeamColor.WHITE;
@@ -72,9 +75,8 @@ public class ChessBoardImpl implements ChessBoard {
     }
     /**
      * Adds a chess piece to the chessboard
-     *
      * @param position where to add the piece to
-     * @param piece    the piece to add
+     * @param piece the piece to add
      */
     @Override
     public void addPiece(ChessPosition position, ChessPiece piece) {
@@ -83,6 +85,10 @@ public class ChessBoardImpl implements ChessBoard {
         board[row][column] = (ChessPieceImpl) piece;
     }
 
+    /**
+     * Removes a chess piece from the chessboard
+     * @param position where to remove the piece from
+     */
     public void removePiece(ChessPosition position) {
         int row = position.getRow() - 1;
         int column = position.getColumn() - 1;
@@ -91,7 +97,6 @@ public class ChessBoardImpl implements ChessBoard {
 
     /**
      * Gets a chess piece on the chessboard
-     *
      * @param position The position to get the piece from
      * @return Either the piece at the position, or null if no piece is at that position
      */
@@ -102,6 +107,11 @@ public class ChessBoardImpl implements ChessBoard {
         return board[row][column];
     }
 
+    /**
+     * Moves a piece from one position to another
+     * @param startingPosition The position to move the piece from
+     * @param endingPosition The position to move the piece to
+     */
     public void movePiece(ChessPosition startingPosition, ChessPosition endingPosition) {
         int startingRow = startingPosition.getRow() - 1;
         int startingCol = startingPosition.getColumn() - 1;
@@ -189,9 +199,15 @@ public class ChessBoardImpl implements ChessBoard {
     }
 
 
+    /**
+     * Checks if a position is in danger
+     * @param testPosition the position to test
+     * @param teamColor the color of the team to test
+     * @return a collection of positions that can attack the position
+     */
     public Collection<ChessPosition> positionInDanger(ChessPosition testPosition, ChessGame.TeamColor teamColor) {
         HashSet<ChessPosition> perpetrators = new HashSet<>();
-        // ensure that the position being tested is attackable
+        // ensure that enemy pieces can attack this position
         boolean addedPiece = false;
         ChessPiece replacedPiece = null;
         if (getPiece(testPosition) == null) {
@@ -200,14 +216,7 @@ public class ChessBoardImpl implements ChessBoard {
         } else if (getPiece(testPosition).getTeamColor() != teamColor) {
             var oppositeColor = getPiece(testPosition).getTeamColor();
             var existingPiece = getPiece(testPosition);
-            switch (existingPiece.getPieceType()) {
-                case KING -> replacedPiece = new King(oppositeColor);
-                case QUEEN -> replacedPiece = new Queen(oppositeColor);
-                case ROOK -> replacedPiece = new Rook(oppositeColor);
-                case BISHOP -> replacedPiece = new Bishop(oppositeColor);
-                case KNIGHT -> replacedPiece = new Knight(oppositeColor);
-                default -> replacedPiece = new Pawn(oppositeColor);
-            }
+            replacedPiece = ChessPieceImpl.createPiece(existingPiece.getPieceType(), oppositeColor);
             addPiece(testPosition, new Pawn(teamColor));
         }
         // evaluate potential attacks

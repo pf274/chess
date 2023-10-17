@@ -11,6 +11,11 @@ public abstract class ChessPieceImpl implements ChessPiece {
     public ChessGame.TeamColor color;
     public ChessPiece.PieceType type;
 
+    /**
+     * Constructor for a chess piece
+     * @param type the type of chess piece
+     * @param color the team color of this piece
+     */
     public ChessPieceImpl(ChessPiece.PieceType type, ChessGame.TeamColor color) {
         this.color = color;
         this.type = type;
@@ -32,10 +37,23 @@ public abstract class ChessPieceImpl implements ChessPiece {
         return type;
     }
 
+    /**
+     * Retrieves all possible moves for this piece
+     * @param board the chess board
+     * @param myPosition the position of this piece
+     * @return a collection of valid moves
+     */
     @Override
     abstract public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition);
 
 
+    /**
+     * Checks if a move is safe for the king
+     * @param board the chess board
+     * @param currentTurn the current turn
+     * @param potentialMove the move to check
+     * @return true if the move is safe, false if it is not
+     */
     public static boolean isSafeMove(ChessBoardImpl board, ChessGame.TeamColor currentTurn, ChessMove potentialMove) {
         var fakeGame = new ChessGameImpl();
         var boardCopy = board.duplicate();
@@ -172,6 +190,12 @@ public abstract class ChessPieceImpl implements ChessPiece {
         }
     }
 
+    /**
+     * Creates a chess piece based on the type and color
+     * @param type the type of chess piece
+     * @param color the team color of this piece
+     * @return a chess piece
+     */
     public static ChessPiece createPiece(PieceType type, ChessGame.TeamColor color) {
         switch (type) {
             case KING -> {
