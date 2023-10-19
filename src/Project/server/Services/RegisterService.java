@@ -27,10 +27,16 @@ public class RegisterService extends ServiceBase {
      * @param email The email of the user
      * @throws ServiceException If the user could not be registered
      */
-    public void register(String username, String password, String email) throws ServiceException {
+    public AuthToken register(String username, String password, String email) throws ServiceException {
         try {
+            var foundUser = userDAO.getUser(username);
+            if (foundUser != null) {
+                throw new ServiceException(403, "username already taken");
+            }
             userDAO.addUser(username, password, email);
-            authDAO.addAuthToken(new AuthToken(username));
+            AuthToken newAuthToken = new AuthToken(username);
+            authDAO.addAuthToken(newAuthToken);
+            return newAuthToken;
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());
         }

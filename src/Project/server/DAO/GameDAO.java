@@ -58,7 +58,8 @@ public class GameDAO implements DAO {
                 return game;
             }
         }
-        throw new DataAccessException("Game not found for game name " + gameName);
+        return null;
+//        throw new DataAccessException("Game not found for game name " + gameName);
     }
 
     /**
@@ -72,7 +73,7 @@ public class GameDAO implements DAO {
                 throw new DataAccessException("Game with Name " + gameName + " already exists");
             }
         }
-        int gameID = games.size();
+        int gameID = games.size() + 1;
         Game game = new Game(gameID, gameName);
         games.add(game);
         return game;

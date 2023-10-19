@@ -49,9 +49,9 @@ public class LoginHandler extends HandlerBase {
 
     public Route endSession = (req, res) -> {
         try {
-            // get variables
-            var body = parseBodyToMap(req.body());
-            String username = (String) body.get("username");
+            AuthToken authToken = getAuthToken(req, this.service.authDAO);
+            assert authToken != null;
+            String username = authToken.username;
             // run service
             this.service.logout(username);
             // return successful response

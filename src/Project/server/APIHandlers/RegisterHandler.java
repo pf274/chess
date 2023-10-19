@@ -37,11 +37,11 @@ public class RegisterHandler extends HandlerBase {
             String password = (String) body.get("password");
             String email = (String) body.get("email");
             if (username == null || password == null || email == null) {
-                throw new ServiceException(409, "username, password, and email required");
+                throw new ServiceException(400, "username, password, and email required");
             }
             // run service
-            this.service.register(username, password, email);
-            AuthToken authToken = new AuthToken(username);
+            AuthToken authToken = this.service.register(username, password, email);
+            System.out.println(authToken.authToken);
             // return response
             var response = ResponseMaker.registerResponse(authToken);
             res.status(response.statusCode);

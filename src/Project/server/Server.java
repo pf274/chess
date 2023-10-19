@@ -1,5 +1,6 @@
 package server;
 
+import com.google.gson.Gson;
 import server.APIHandlers.*;
 import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
@@ -60,11 +61,12 @@ public class Server {
         // authorization
         before((request, response) -> {
             String requestPath = request.pathInfo();
+            String requestMethod = request.requestMethod();
             // check authorization
-            if ((Objects.equals(requestPath, "/session") || Objects.equals(requestPath, "/user")) && Objects.equals(request.requestMethod(), "POST")) {
+            if ((Objects.equals(requestPath, "/session") || Objects.equals(requestPath, "/user")) && Objects.equals(requestMethod, "POST")) {
                 return;
             }
-            if ((Objects.equals(requestPath, "/db") && Objects.equals(request.requestMethod(), "DELETE"))) {
+            if ((Objects.equals(requestPath, "/db") && Objects.equals(requestMethod, "DELETE"))) {
                 return;
             }
             String authToken = request.headers("Authorization");
@@ -73,7 +75,8 @@ public class Server {
                 authToken = authToken.substring(7);
             }
             if (authToken == null || serverInstance.authDAO.getAuthToken(authToken) == null) {
-                halt(401, "Error: unauthorized");
+                var res = ResponseMaker.exceptionResponse(401, "unauthorized");
+                halt(401, res.statusMessage);
             }
         });
 
