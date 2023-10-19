@@ -6,14 +6,6 @@ package server.Models;
 public class User {
 
     /**
-     * The user's color
-     */
-    public enum Color {
-        BLACK,
-        WHITE
-    }
-
-    /**
      * The user's username
      */
     public String username;

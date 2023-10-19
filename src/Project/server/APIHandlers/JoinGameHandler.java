@@ -4,11 +4,11 @@ import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
 import server.Models.AuthToken;
-import server.Responses.ResponseMaker;
+import server.Responses.ResponseMapper;
 import server.Services.JoinGameService;
 import server.Services.ServiceException;
-import spark.Request;
 import spark.Route;
+import java.util.HashMap;
 
 
 /**
@@ -27,20 +27,22 @@ public class JoinGameHandler extends HandlerBase {
             String username = authToken.username;
             // get body variables
             var body = parseBodyToMap(req.body());
-            String rawGameID = (String) body.get("GameID");
-            if (rawGameID == null) {
+            var gameID = body.get("gameID");
+            if (gameID == null) {
                 throw new ServiceException(403, "bad request");
             }
-            int GameID = Integer.parseInt(rawGameID);
             String playerColor = (String) body.get("playerColor");
+            int gameIDAsInt = (int) Math.floor((Double) gameID);
+            if (this.service.gameDAO.getGameByID(gameIDAsInt) == null) {
+                ResponseMapper.exceptionResponse(400, "game does not exist.", res);
+                return null;
+            }
             // run service
-            this.service.joinGame(GameID, username, playerColor);
+            this.service.joinGame(gameIDAsInt, username, playerColor);
             // return successful response
-            var response = ResponseMaker.joinGameResponse();
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
+            ResponseMapper.joinGameResponse(res);
         } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
+            throw new APIException(e.statusCode, e.statusMessage);
         }
         return null;
     };
@@ -49,18 +51,15 @@ public class JoinGameHandler extends HandlerBase {
     public Route leaveGame = (req, res) -> {
         try {
             // get variables
-            int GameID = 1234;
             String username = "laseredface";
-//                int GameID = Integer.parseInt(sparkRequest.getBody().get("GameID"));
-//                String username = sparkRequest.getBody().get("username");
+            HashMap body = parseBodyToMap(req.body());
+            int gameID = (int) body.get("gameID");
             // run service
-            this.service.leaveGame(GameID, username);
+            this.service.leaveGame(gameID, username);
             // return successful response
-            var response = ResponseMaker.leaveGameResponse();
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
+            ResponseMapper.leaveGameResponse(res);
         } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
+            throw new APIException(e.statusCode, e.statusMessage);
         }
         return null;
     };

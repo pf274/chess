@@ -8,7 +8,6 @@ import server.Responses.*;
 import server.Services.GameDataService;
 import server.Services.ServiceException;
 import spark.Route;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,11 +35,9 @@ public class GameDataHandler extends HandlerBase {
             // run service
             this.service.clear();
             // return successful response
-            var response = ResponseMaker.clearDatabaseResponse();
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
+            ResponseMapper.clearDatabaseResponse(res);
         } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
+            throw new APIException(e.statusCode, e.statusMessage);
         }
         return null;
     };
@@ -50,11 +47,9 @@ public class GameDataHandler extends HandlerBase {
             // run service
             ArrayList<Game> games = this.service.listGames();
             // return successful response
-            var response = ResponseMaker.listGamesResponse(games);
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
+            ResponseMapper.listGamesResponse(games, res);
         } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
+            throw new APIException(e.statusCode, e.statusMessage);
         }
         return null;
     };
@@ -62,19 +57,19 @@ public class GameDataHandler extends HandlerBase {
     public Route createGame = (req, res) -> {
         try {
             // get variables
+            String rawBody = req.body();
             HashMap body = parseBodyToMap(req.body());
             String gameName = (String) body.get("gameName");
             if (gameName == null) {
-                return ResponseMaker.exceptionResponse(400, "bad request");
+//                return ResponseMaker.exceptionResponse(400, "bad request");
+                gameName = "Game " + (this.service.gameDAO.games.size() + 1);
             }
             // run service
             Game newGame = this.service.createGame(gameName);
             // return successful response
-            var response = ResponseMaker.createGameResponse(newGame.gameID);
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
+            ResponseMapper.createGameResponse(newGame.gameID, res);
         } catch (ServiceException e) {
-            return ResponseMaker.exceptionResponse(e.statusCode, e.message);
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }
         return null;
     };

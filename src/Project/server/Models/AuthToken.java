@@ -22,7 +22,6 @@ public class AuthToken {
      * @param username the username associated with this auth token
      */
     public AuthToken(String username) {
-        // TODO: generate unique auth tokens
         this.username = username;
         this.authToken = UUID.randomUUID().toString();
     }

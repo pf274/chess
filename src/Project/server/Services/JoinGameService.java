@@ -4,9 +4,6 @@ import server.DAO.AuthDAO;
 import server.DAO.DataAccessException;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
-import server.Models.User;
-import server.Responses.ResponseMaker;
-
 import java.util.Objects;
 
 /**
@@ -42,13 +39,7 @@ public class JoinGameService extends ServiceBase {
             if (foundGame.whiteUsername != null && Objects.equals(playerColor, "WHITE")) {
                 throw new ServiceException(403, "already taken");
             }
-            User.Color color = null;
-            if (Objects.equals(playerColor, "WHITE")) {
-                color = User.Color.WHITE;
-            } else if (Objects.equals(playerColor, "BLACK")) {
-                color = User.Color.BLACK;
-            }
-            gameDAO.addUserToGame(gameID, username, color);
+            gameDAO.addUserToGame(gameID, username, playerColor);
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());
         }

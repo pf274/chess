@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import server.DAO.AuthDAO;
 import server.Models.AuthToken;
 import spark.Request;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;

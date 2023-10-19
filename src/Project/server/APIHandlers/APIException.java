@@ -5,13 +5,13 @@ package server.APIHandlers;
  */
 public class APIException extends Exception {
     /**
-     * Creates a new APIException with the given message.
-     * @param message the error message
+     * The status code of the error
      */
-    public APIException(String message) {
-        super(message);
-    }
-
+    public int statusCode;
+    /**
+     * The status message of the error
+     */
+    public String statusMessage;
     /**
      * Creates a new APIException with the given message and status code.
      * @param statusCode the status code
@@ -19,5 +19,7 @@ public class APIException extends Exception {
      */
     public APIException(int statusCode, String message) {
         super(statusCode + " " + message);
+        this.statusCode = statusCode;
+        this.statusMessage = message;
     }
 }

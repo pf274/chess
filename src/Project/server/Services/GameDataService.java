@@ -5,7 +5,6 @@ import server.DAO.DataAccessException;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
 import server.Models.Game;
-
 import java.util.ArrayList;
 
 /**

@@ -34,7 +34,7 @@ public class Game {
 
     /**
      * Creates a new game
-     * @param gameID the game ID
+     * @param gameID the game's ID
      * @param gameName the game name
      */
     public Game(int gameID, String gameName) {

@@ -1,7 +1,6 @@
 package server.Responses;
 
 import com.google.gson.Gson;
-
 import java.util.HashMap;
 
 /**

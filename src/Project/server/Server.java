@@ -1,17 +1,12 @@
 package server;
 
-import com.google.gson.Gson;
 import server.APIHandlers.*;
 import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
-import server.Models.AuthToken;
-import server.Responses.APIResponse;
-import server.Responses.ResponseMaker;
-import spark.Request;
-
+import server.Responses.ResponseMapper;
+import spark.Route;
 import java.util.Objects;
-
 import static spark.Spark.*;
 
 /**
@@ -19,6 +14,15 @@ import static spark.Spark.*;
  * It also contains the DAOs that are used by the handlers.
  */
 public class Server {
+
+    /**
+     * The default route handler, which is used to handle requests that don't match any of the other routes.
+     */
+    private static final Route defaultRouteHandler = (req, res) -> {
+        ResponseMapper.exceptionResponse(404, "path not found.");
+        return null;
+    };
+
     /**
      * The server's gameDAO
      */
@@ -54,6 +58,10 @@ public class Server {
      */
     private final GameDataHandler gameDataHandler = new GameDataHandler(authDAO, userDAO, gameDAO);
 
+    /**
+     * The server
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         var serverInstance = new Server();
         port(8080);
@@ -75,8 +83,8 @@ public class Server {
                 authToken = authToken.substring(7);
             }
             if (authToken == null || serverInstance.authDAO.getAuthToken(authToken) == null) {
-                var res = ResponseMaker.exceptionResponse(401, "unauthorized");
-                halt(401, res.statusMessage);
+                var res = ResponseMapper.exceptionResponse(401, "unauthorized", response);
+                halt(res.statusCode, res.statusMessage);
             }
         });
 
@@ -92,6 +100,15 @@ public class Server {
         // joinGameHandler routes
         put("/game", serverInstance.joinGameHandler.joinGame);
 
+
+        // default routes (most are caught by authorization)
+        path("*", () -> {
+            get("", defaultRouteHandler);
+            post("", defaultRouteHandler);
+            delete("", defaultRouteHandler);
+            put("", defaultRouteHandler);
+        });
+
         // set response type
         after((request, response) -> {
             response.type("application/json");
@@ -99,33 +116,12 @@ public class Server {
 
         // handle exceptions
         exception(APIException.class, (exception, request, response) -> {
-            APIResponse exceptionResponse = handleException(exception);
-            response.status(exceptionResponse.statusCode);
-            response.body(exceptionResponse.statusMessage);
+            response.status(500);
+            response.body(exception.getMessage());
         });
         exception(Exception.class, (exception, request, response) -> {
           response.status(500);
-          response.body("Internal server error");
+          response.body(exception.getMessage());
         });
     }
-
-    /**
-     * Converts an Exception into an APIResponse.
-     * @param exception the exception
-     * @return an APIResponse
-     */
-    private static APIResponse handleException(Exception exception) {
-        try {
-            // convert the error message into an API response
-            String message = exception.getMessage();
-            int firstSpace = message.indexOf(" ");
-            int status = Integer.parseInt(message.substring(0, firstSpace));
-            String description = message.substring(firstSpace + 1);
-            return ResponseMaker.exceptionResponse(status, description);
-        } catch (Exception e) {
-            return ResponseMaker.exceptionResponse(500, "Internal server error");
-        }
-
-    }
-
 }

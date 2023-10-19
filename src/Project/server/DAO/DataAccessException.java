@@ -3,14 +3,15 @@ package server.DAO;
 /**
  * Indicates there was an error connecting to the database
  */
-public class DataAccessException extends Exception{
+public class DataAccessException extends Exception {
     /**
-     * Creates a new DataAccessException with the given message.
-     * @param message the error message
+     * The status code of the error
      */
-    public DataAccessException(String message) {
-        super(message);
-    }
+    public int statusCode;
+    /**
+     * The status message of the error
+     */
+    public String statusMessage;
 
     /**
      * Creates a new DataAccessException with the given message and status code.
@@ -18,6 +19,8 @@ public class DataAccessException extends Exception{
      * @param message the error message
      */
     public DataAccessException(int StatusCode, String message) {
-        super(StatusCode + " " + message);
+        super(message);
+        this.statusCode = StatusCode;
+        this.statusMessage = message;
     }
 }

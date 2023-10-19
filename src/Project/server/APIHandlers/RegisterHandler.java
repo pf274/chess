@@ -4,7 +4,7 @@ import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
 import server.Models.AuthToken;
-import server.Responses.ResponseMaker;
+import server.Responses.ResponseMapper;
 import server.Services.RegisterService;
 import server.Services.ServiceException;
 import spark.Route;
@@ -43,11 +43,9 @@ public class RegisterHandler extends HandlerBase {
             AuthToken authToken = this.service.register(username, password, email);
             System.out.println(authToken.authToken);
             // return response
-            var response = ResponseMaker.registerResponse(authToken);
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
+            ResponseMapper.registerResponse(authToken, res);
         } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
+            throw new APIException(e.statusCode, e.statusMessage);
         }
         return null;
     };

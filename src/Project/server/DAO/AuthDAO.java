@@ -1,7 +1,6 @@
 package server.DAO;
 
 import server.Models.AuthToken;
-
 import java.util.ArrayList;
 
 /**
@@ -21,7 +20,7 @@ public class AuthDAO implements DAO {
     public void addAuthToken(AuthToken authToken) throws DataAccessException {
         for (AuthToken token : authTokens) {
             if (token.authToken.equals(authToken.authToken)) {
-                throw new DataAccessException("Auth token " + authToken.authToken + " already exists");
+                throw new DataAccessException(500, "Auth token " + authToken.authToken + " already exists");
             }
         }
         authTokens.add(authToken);
@@ -46,7 +45,6 @@ public class AuthDAO implements DAO {
                 return token;
             }
         }
-//        throw new DataAccessException("Auth token " + authToken + " not found");
         return null;
     }
 
@@ -62,23 +60,7 @@ public class AuthDAO implements DAO {
                 return token;
             }
         }
-        throw new DataAccessException("Auth token for user " + username + " not found");
-    }
-
-    /**
-     * Updates an auth token in the list of auth tokens, given the auth token string and the new auth token.
-     * @param authToken the auth token string
-     * @param newAuthToken the new auth token
-     * @throws DataAccessException if the auth token does not exist
-     */
-    public void updateAuthToken(String authToken, AuthToken newAuthToken) throws DataAccessException {
-        for (int i = 0; i < authTokens.size(); i++) {
-            if (authTokens.get(i).authToken.equals(authToken)) {
-                authTokens.set(i, newAuthToken);
-                return;
-            }
-        }
-        throw new DataAccessException("Auth token " + authToken + " not found");
+        throw new DataAccessException(500, "Auth token for user " + username + " not found");
     }
 
     /**
@@ -93,6 +75,6 @@ public class AuthDAO implements DAO {
                 return;
             }
         }
-        throw new DataAccessException("Auth token " + authToken + " not found");
+        throw new DataAccessException(500, "Auth token " + authToken + " not found");
     }
 }

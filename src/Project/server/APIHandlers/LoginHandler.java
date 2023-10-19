@@ -4,12 +4,10 @@ import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
 import server.Models.AuthToken;
-import server.Responses.ResponseMaker;
+import server.Responses.ResponseMapper;
 import server.Services.LoginService;
 import server.Services.ServiceException;
 import spark.Route;
-
-import java.util.ArrayList;
 
 /**
  * This class is used to handle the API requests that are related to logging in and out.
@@ -36,13 +34,12 @@ public class LoginHandler extends HandlerBase {
             AuthToken authToken = this.service.login(username, password);
             // return response
             if (authToken == null) {
-                return ResponseMaker.unauthorizedResponse();
+                ResponseMapper.unauthorizedResponse(res);
+            } else {
+                ResponseMapper.loginResponse(authToken, res);
             }
-            var response = ResponseMaker.loginResponse(authToken);
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
         } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
+            throw new APIException(e.statusCode, e.statusMessage);
         }
         return null;
     };
@@ -55,11 +52,9 @@ public class LoginHandler extends HandlerBase {
             // run service
             this.service.logout(username);
             // return successful response
-            var response = ResponseMaker.logoutResponse();
-            res.status(response.statusCode);
-            res.body(response.statusMessage);
+            ResponseMapper.logoutResponse(res);
         } catch (ServiceException e) {
-            throw new APIException(e.getMessage());
+            throw new APIException(e.statusCode, e.statusMessage);
         }
         return null;
     };
