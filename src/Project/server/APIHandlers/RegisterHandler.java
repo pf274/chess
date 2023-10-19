@@ -4,10 +4,10 @@ import server.DAO.AuthDAO;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
 import server.Models.AuthToken;
-import server.Responses.APIResponse;
-import server.Responses.RegisterResponse;
+import server.Responses.ResponseMaker;
 import server.Services.RegisterService;
 import server.Services.ServiceException;
+import spark.Route;
 
 /**
  * This class is used to handle the API requests that are related to registering.
@@ -17,7 +17,7 @@ public class RegisterHandler extends HandlerBase {
     /**
      * The service instance that this handler will use to handle requests.
      */
-    private final RegisterService service;
+    private RegisterService service = null;
 
     /**
      * Creates a new RegisterHandler and defines its routes.
@@ -27,22 +27,28 @@ public class RegisterHandler extends HandlerBase {
      */
     public RegisterHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
         this.service = new RegisterService(authDAO, userDAO, gameDAO);
-
-        // register
-        addRoute(new APIRoute(method.POST, "/user/register", parsedRequest -> {
-            try {
-                // get variables
-                String username = parsedRequest.getBody().get("username");
-                String password = parsedRequest.getBody().get("password");
-                String email = parsedRequest.getBody().get("email");
-                // run service
-                this.service.register(username, password, email);
-                AuthToken authToken = new AuthToken(username);
-                // return response
-                return new RegisterResponse(username, authToken);
-            } catch (ServiceException e) {
-                throw new APIException(e.getMessage());
-            }
-        }));
     }
+
+    public Route register = (req, res) -> {
+        try {
+            // get variables
+            var body = parseBodyToMap(req.body());
+            String username = (String) body.get("username");
+            String password = (String) body.get("password");
+            String email = (String) body.get("email");
+            if (username == null || password == null || email == null) {
+                throw new ServiceException(409, "username, password, and email required");
+            }
+            // run service
+            this.service.register(username, password, email);
+            AuthToken authToken = new AuthToken(username);
+            // return response
+            var response = ResponseMaker.registerResponse(authToken);
+            res.status(response.statusCode);
+            res.body(response.statusMessage);
+        } catch (ServiceException e) {
+            throw new APIException(e.getMessage());
+        }
+        return null;
+    };
 }

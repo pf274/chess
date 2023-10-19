@@ -11,17 +11,17 @@ public class ServiceBase {
     /**
      * The server's authDAO, passed to this service instance from the Server instance through a handler instance.
      */
-    AuthDAO authDAO = null;
+    public AuthDAO authDAO = null;
 
     /**
      * The server's userDAO, passed to this service instance from the Server instance through a handler instance.
      */
-    UserDAO userDAO = null;
+    public UserDAO userDAO = null;
 
     /**
      * The server's gameDAO, passed to this service instance from the Server instance through a handler instance.
      */
-    GameDAO gameDAO = null;
+    public GameDAO gameDAO = null;
 
     /**
      * Creates a new Service with the given DAOs.

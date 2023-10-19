@@ -7,8 +7,10 @@ import server.Models.Game;
 import server.Responses.*;
 import server.Services.GameDataService;
 import server.Services.ServiceException;
+import spark.Route;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This class is used to handle the API requests that are related to game data, such as resetting the database.
@@ -17,7 +19,7 @@ public class GameDataHandler extends HandlerBase {
     /**
      * The service instance that this handler will use to handle requests.
      */
-    private final GameDataService service;
+    private GameDataService service = null;
 
     /**
      * Creates a new GameDataHandler and defines its routes.
@@ -27,43 +29,53 @@ public class GameDataHandler extends HandlerBase {
      */
     public GameDataHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
         this.service = new GameDataService(authDAO, userDAO, gameDAO);
-
-        // list games
-        addRoute(new APIRoute(method.GET, "/game/list", parsedRequest -> {
-            try {
-                // run service
-                ArrayList<Game> games = this.service.listGames();
-                // return successful response
-                return new ListGamesResponse(games);
-            } catch (ServiceException e) {
-                throw new APIException(e.getMessage());
-            }
-        }));
-
-        // clear database
-        addRoute(new APIRoute(method.DELETE, "/game/clear", parsedRequest -> {
-            try {
-                // run service
-                this.service.clear();
-                // return successful response
-                return new ClearDatabaseResponse();
-            } catch (ServiceException e) {
-                throw new APIException(e.getMessage());
-            }
-        }));
-
-        // create game
-        addRoute(new APIRoute(method.POST, "/game/create", parsedRequest -> {
-            try {
-                // get variables
-                String gameName = parsedRequest.getBody().get("gameName");
-                // run service
-                Game newGame = this.service.createGame(gameName);
-                // return successful response
-                return new CreateGameResponse(newGame.gameID);
-            } catch (ServiceException e) {
-                throw new APIException(e.getMessage());
-            }
-        }));
     }
+
+    public Route clearDatabase = (req, res) -> {
+        try {
+            // run service
+            this.service.clear();
+            // return successful response
+            var response = ResponseMaker.clearDatabaseResponse();
+            res.status(response.statusCode);
+            res.body(response.statusMessage);
+        } catch (ServiceException e) {
+            throw new APIException(e.getMessage());
+        }
+        return null;
+    };
+
+    public Route getGameList = (req, res) -> {
+        try {
+            // run service
+            ArrayList<Game> games = this.service.listGames();
+            // return successful response
+            var response = ResponseMaker.listGamesResponse(games);
+            res.status(response.statusCode);
+            res.body(response.statusMessage);
+        } catch (ServiceException e) {
+            throw new APIException(e.getMessage());
+        }
+        return null;
+    };
+
+    public Route createGame = (req, res) -> {
+        try {
+            // get variables
+            HashMap body = parseBodyToMap(req.body());
+            String gameName = (String) body.get("gameName");
+            if (gameName == null) {
+                return ResponseMaker.exceptionResponse(400, "bad request");
+            }
+            // run service
+            Game newGame = this.service.createGame(gameName);
+            // return successful response
+            var response = ResponseMaker.createGameResponse(newGame.gameID);
+            res.status(response.statusCode);
+            res.body(response.statusMessage);
+        } catch (ServiceException e) {
+            return ResponseMaker.exceptionResponse(e.statusCode, e.message);
+        }
+        return null;
+    };
 }

@@ -1,11 +1,11 @@
-package PassoffTests.ChessTests.ChessExtraCredit;
+package passoffTests.ChessTests.ChessExtraCredit;
 
 import chess.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import PassoffTests.TestFactory;
+import passoffTests.TestFactory;
 
 /**
  * Tests if the ChessGame implementation can handle En Passant moves

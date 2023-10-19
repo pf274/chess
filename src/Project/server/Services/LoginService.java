@@ -35,8 +35,7 @@ public class LoginService extends ServiceBase {
                 throw new ServiceException(400, "User does not exist");
             }
             if (!userInfo.password.equals(password)) {
-//                throw new ServiceException(400, "Password is incorrect");
-                return null;
+                throw new ServiceException(400, "Password is incorrect");
             }
             AuthToken authToken = new AuthToken(username);
             authDAO.addAuthToken(authToken);

@@ -26,7 +26,7 @@ public class UserDAO implements DAO {
                 return user;
             }
         }
-        throw new DataAccessException("User with username " + username + " not found");
+        throw new DataAccessException("User with username '" + username + "' not found");
     }
 
     /**
@@ -41,7 +41,7 @@ public class UserDAO implements DAO {
                 return user;
             }
         }
-        throw new DataAccessException("User with email " + email + " not found");
+        throw new DataAccessException("User with email '" + email + "' not found");
     }
 
     /**
@@ -54,10 +54,10 @@ public class UserDAO implements DAO {
     public void addUser(String username, String password, String email) throws DataAccessException {
         for (User u : users) {
             if (u.username.equals(username)) {
-                throw new DataAccessException("User with username " + username + " already exists");
+                throw new DataAccessException("User with username '" + username + "' already exists");
             }
             if (u.email.equals(email)) {
-                throw new DataAccessException("User with email " + email + " already exists");
+                throw new DataAccessException("User with email '" + email + "' already exists");
             }
         }
         User user = new User(username, password, email);
@@ -77,7 +77,7 @@ public class UserDAO implements DAO {
                 return;
             }
         }
-        throw new DataAccessException("User with username " + username + " not found");
+        throw new DataAccessException("User with username '" + username + "' not found");
     }
 
     /**

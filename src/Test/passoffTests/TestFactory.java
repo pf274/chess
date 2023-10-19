@@ -1,4 +1,4 @@
-package PassoffTests;
+package passoffTests;
 
 import chess.*;
 import chess.Pieces.*;

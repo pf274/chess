@@ -58,6 +58,9 @@ public class GameDataService extends ServiceBase {
      */
     public Game createGame(String gameName) throws ServiceException {
         try {
+            if (gameDAO.getGameByGameName(gameName) != null) {
+                throw new ServiceException(400, "bad request");
+            }
             return gameDAO.addGame(gameName);
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());

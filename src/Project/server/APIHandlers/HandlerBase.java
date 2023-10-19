@@ -1,16 +1,14 @@
 package server.APIHandlers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import server.DAO.AuthDAO;
-import server.DAO.GameDAO;
-import server.DAO.UserDAO;
-import server.ParsedRequest;
-import server.Responses.APIResponse;
-import server.Responses.ExceptionResponse;
-import server.Services.*;
+import server.Models.AuthToken;
+import spark.Request;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * A base class to define common API handler functionality.
@@ -18,56 +16,42 @@ import java.util.ArrayList;
 public class HandlerBase {
 
     /**
-     * A list of routes that this handler will handle.
+     * Uses Gson to parse the request body
+     * @param rawBody the body to parse
+     * @return the parsed body
      */
-    private final ArrayList<APIRoute> routes = new ArrayList<>();
-
-    /**
-     * Adds a route to the list of routes.
-     * @param route the route to add
-     */
-    public void addRoute(APIRoute route) {
-        routes.add(route);
+    public HashMap parseBodyToMap(String rawBody) {
+        var type = HashMap.class;
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson = builder.create();
+        var result = gson.fromJson(rawBody, type);
+        return Objects.requireNonNullElseGet(result, HashMap::new);
     }
 
     /**
-     * An enum to define the HTTP methods.
+     * Uses Gson to parse the request body
+     * @param rawBody the body to parse
+     * @return the parsed body
      */
-    public enum method {
-        PUT,
-        POST,
-        GET,
-        DELETE
+    public ArrayList parseBodyToArray(String rawBody) {
+        var type = ArrayList.class;
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson = builder.create();
+        var result = gson.fromJson(rawBody, type);
+        return Objects.requireNonNullElseGet(result, ArrayList::new);
     }
 
-
-    /**
-     * Handles a request by finding the correct route and running the service.
-     * @param request the request to handle
-     * @return the response to the request
-     * @throws APIException if the request could not be handled or if the route does not exist.
-     */
-    public APIResponse handleRequest(ParsedRequest request) throws APIException {
-        for (APIRoute route : routes) {
-            if (route.getMethod() == request.getMethod() && route.getPath().equals(request.getPath())) {
-                return route.handle(request);
-            }
+    public static AuthToken getAuthToken(Request req, AuthDAO authDAO) {
+        String authTokenString = req.headers("Authorization");
+        if (authTokenString == null) {
+            return null;
         }
-        return new ExceptionResponse(404, "Not found.");
-    }
-
-    /**
-     * Checks if this handler has a route with the given method and path.
-     * @param method the method to check
-     * @param path the path to check
-     * @return whether the handler has a route with the given method and path
-     */
-    public boolean hasRoute(method method, String path) {
-        for (APIRoute route : routes) {
-            if (route.getMethod() == method && route.getPath().equals(path)) {
-                return true;
-            }
+        // remove bearer prefix
+        if (authTokenString.startsWith("Bearer ")) {
+            authTokenString = authTokenString.substring(7);
         }
-        return false;
+        return authDAO.getAuthToken(authTokenString);
     }
 }

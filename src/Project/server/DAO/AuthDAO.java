@@ -39,15 +39,15 @@ public class AuthDAO implements DAO {
      * Gets an auth token from the list of auth tokens, given the auth token string.
      * @param authToken the auth token string
      * @return the auth token
-     * @throws DataAccessException if the auth token does not exist
      */
-    public AuthToken getAuthToken(String authToken) throws DataAccessException {
+    public AuthToken getAuthToken(String authToken) {
         for (AuthToken token : authTokens) {
             if (token.authToken.equals(authToken)) {
                 return token;
             }
         }
-        throw new DataAccessException("Auth token " + authToken + " not found");
+//        throw new DataAccessException("Auth token " + authToken + " not found");
+        return null;
     }
 
     /**

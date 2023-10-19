@@ -4,6 +4,7 @@ import server.DAO.AuthDAO;
 import server.DAO.DataAccessException;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
+import server.Models.AuthToken;
 
 /**
  * Functionality for registering a new user
@@ -29,6 +30,7 @@ public class RegisterService extends ServiceBase {
     public void register(String username, String password, String email) throws ServiceException {
         try {
             userDAO.addUser(username, password, email);
+            authDAO.addAuthToken(new AuthToken(username));
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());
         }

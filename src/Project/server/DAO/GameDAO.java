@@ -163,13 +163,15 @@ public class GameDAO implements DAO {
                     } else {
                         throw new DataAccessException("White player already exists");
                     }
-                } else {
+                } else if (playerColor.equals(User.Color.BLACK)) {
                     if (game.blackUsername == null) {
                         game.blackUsername = username;
                         return;
                     } else {
                         throw new DataAccessException("Black player already exists");
                     }
+                } else {
+                    // TODO: handle spectators
                 }
             }
         }
