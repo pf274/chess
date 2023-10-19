@@ -19,6 +19,10 @@ public class JoinGameHandler extends HandlerBase {
      * The service instance that this handler will use to handle requests.
      */
     private JoinGameService service = null;
+
+    /**
+     * The route handler that handles the join game request.
+     */
     public Route joinGame = (req, res) -> {
         try {
             // get authorization
@@ -42,24 +46,7 @@ public class JoinGameHandler extends HandlerBase {
             // return successful response
             ResponseMapper.joinGameResponse(res);
         } catch (ServiceException e) {
-            throw new APIException(e.statusCode, e.statusMessage);
-        }
-        return null;
-    };
-
-
-    public Route leaveGame = (req, res) -> {
-        try {
-            // get variables
-            String username = "laseredface";
-            HashMap body = parseBodyToMap(req.body());
-            int gameID = (int) body.get("gameID");
-            // run service
-            this.service.leaveGame(gameID, username);
-            // return successful response
-            ResponseMapper.leaveGameResponse(res);
-        } catch (ServiceException e) {
-            throw new APIException(e.statusCode, e.statusMessage);
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }
         return null;
     };

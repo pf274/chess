@@ -29,6 +29,9 @@ public class RegisterHandler extends HandlerBase {
         this.service = new RegisterService(authDAO, userDAO, gameDAO);
     }
 
+    /**
+     * The route handler that handles the register request.
+     */
     public Route register = (req, res) -> {
         try {
             // get variables
@@ -45,7 +48,7 @@ public class RegisterHandler extends HandlerBase {
             // return response
             ResponseMapper.registerResponse(authToken, res);
         } catch (ServiceException e) {
-            throw new APIException(e.statusCode, e.statusMessage);
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }
         return null;
     };

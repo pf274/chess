@@ -78,7 +78,7 @@ public class Server {
                 return;
             }
             String authToken = request.headers("Authorization");
-            // get rid of "Bearer " prefix
+            // get rid of "Bearer " prefix (for Postman debugging)
             if (authToken != null && authToken.startsWith("Bearer ")) {
                 authToken = authToken.substring(7);
             }

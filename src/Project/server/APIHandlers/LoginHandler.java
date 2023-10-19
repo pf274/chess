@@ -18,6 +18,10 @@ public class LoginHandler extends HandlerBase {
      * The service instance that this handler will use to handle requests.
      */
     private LoginService service = null;
+
+    /**
+     * The route handler that handles the login request.
+     */
     public Route newSession = (req, res) -> {
         try {
             // get variables
@@ -39,11 +43,14 @@ public class LoginHandler extends HandlerBase {
                 ResponseMapper.loginResponse(authToken, res);
             }
         } catch (ServiceException e) {
-            throw new APIException(e.statusCode, e.statusMessage);
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }
         return null;
     };
 
+    /**
+     * The route handler that handles the logout request.
+     */
     public Route endSession = (req, res) -> {
         try {
             AuthToken authToken = getAuthToken(req, this.service.authDAO);
@@ -54,7 +61,7 @@ public class LoginHandler extends HandlerBase {
             // return successful response
             ResponseMapper.logoutResponse(res);
         } catch (ServiceException e) {
-            throw new APIException(e.statusCode, e.statusMessage);
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }
         return null;
     };

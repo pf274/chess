@@ -30,6 +30,9 @@ public class GameDataHandler extends HandlerBase {
         this.service = new GameDataService(authDAO, userDAO, gameDAO);
     }
 
+    /**
+     * The route handler that handles the clear database request.
+     */
     public Route clearDatabase = (req, res) -> {
         try {
             // run service
@@ -37,11 +40,14 @@ public class GameDataHandler extends HandlerBase {
             // return successful response
             ResponseMapper.clearDatabaseResponse(res);
         } catch (ServiceException e) {
-            throw new APIException(e.statusCode, e.statusMessage);
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }
         return null;
     };
 
+    /**
+     * The route handler that handles the get game list request.
+     */
     public Route getGameList = (req, res) -> {
         try {
             // run service
@@ -49,19 +55,20 @@ public class GameDataHandler extends HandlerBase {
             // return successful response
             ResponseMapper.listGamesResponse(games, res);
         } catch (ServiceException e) {
-            throw new APIException(e.statusCode, e.statusMessage);
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }
         return null;
     };
 
+    /**
+     * The route handler that handles the create game request.
+     */
     public Route createGame = (req, res) -> {
         try {
             // get variables
-            String rawBody = req.body();
             HashMap body = parseBodyToMap(req.body());
             String gameName = (String) body.get("gameName");
             if (gameName == null) {
-//                return ResponseMaker.exceptionResponse(400, "bad request");
                 gameName = "Game " + (this.service.gameDAO.games.size() + 1);
             }
             // run service
