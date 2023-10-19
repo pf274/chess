@@ -26,7 +26,8 @@ public class UserDAO implements DAO {
                 return user;
             }
         }
-        throw new DataAccessException("User with username '" + username + "' not found");
+        return null;
+//        throw new DataAccessException("User with username '" + username + "' not found");
     }
 
     /**

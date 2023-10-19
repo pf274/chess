@@ -59,8 +59,12 @@ public class Server {
 
         // authorization
         before((request, response) -> {
+            String requestPath = request.pathInfo();
             // check authorization
-            if ((Objects.equals(request.pathInfo(), "/session") || Objects.equals(request.pathInfo(), "/user")) && Objects.equals(request.requestMethod(), "POST")) {
+            if ((Objects.equals(requestPath, "/session") || Objects.equals(requestPath, "/user")) && Objects.equals(request.requestMethod(), "POST")) {
+                return;
+            }
+            if ((Objects.equals(requestPath, "/db") && Objects.equals(request.requestMethod(), "DELETE"))) {
                 return;
             }
             String authToken = request.headers("Authorization");

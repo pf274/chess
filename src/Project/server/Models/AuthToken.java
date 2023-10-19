@@ -1,5 +1,7 @@
 package server.Models;
 
+import java.util.UUID;
+
 /**
  * Represents an auth token
  */
@@ -22,6 +24,6 @@ public class AuthToken {
     public AuthToken(String username) {
         // TODO: generate unique auth tokens
         this.username = username;
-        this.authToken = "AUTHTOKEN" + username;
+        this.authToken = UUID.randomUUID().toString();
     }
 }

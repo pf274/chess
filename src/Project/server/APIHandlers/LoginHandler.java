@@ -27,9 +27,12 @@ public class LoginHandler extends HandlerBase {
             String username = (String) body.get("username");
             String password = (String) body.get("password");
             if (username == null || password == null) {
-                throw new ServiceException(401, "Error: username and password required");
+                throw new ServiceException(401, "username and password required");
             }
             // run service
+            if (this.service.userDAO.getUser(username) == null) {
+                throw new ServiceException(401, "username not found");
+            }
             AuthToken authToken = this.service.login(username, password);
             // return response
             if (authToken == null) {
