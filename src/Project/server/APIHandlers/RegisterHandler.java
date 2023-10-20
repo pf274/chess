@@ -44,7 +44,6 @@ public class RegisterHandler extends HandlerBase {
             }
             // run service
             AuthToken authToken = this.service.register(username, password, email);
-            System.out.println(authToken.authToken);
             // return response
             ResponseMapper.registerResponse(authToken, res);
         } catch (ServiceException e) {

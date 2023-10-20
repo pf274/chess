@@ -38,7 +38,6 @@ public class LoginService extends ServiceBase {
                 throw new ServiceException(401, "Password is incorrect");
             }
             AuthToken authToken = new AuthToken(username);
-            System.out.println(authToken.authToken);
             authDAO.addAuthToken(authToken);
             return authToken;
         } catch (DataAccessException e) {
