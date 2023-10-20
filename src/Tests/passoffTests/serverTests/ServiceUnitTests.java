@@ -86,7 +86,7 @@ public class ServiceUnitTests {
     @DisplayName("GameDataService: list games (success)")
     public void test4() {
         try {
-            gameDataService.listGames(false);
+            gameDataService.listGames();
             assert true;
         } catch (ServiceException e) {
             assert false;
@@ -98,10 +98,10 @@ public class ServiceUnitTests {
     @DisplayName("GameDataService: list games (failure)")
     public void test5() {
         try {
-            // this is the only way I could think of to make this fail without restructuring the entire server to a much worse model.
-            // I imagine in the future there will be additional ways to test this.
-            gameDataService.listGames(true);
-            assert false;
+            // simulates when there is a game, but it is not returned by listGames().
+            gameDataService.clear();
+            var games = gameDataService.listGames();
+            assert games.isEmpty();
         } catch (ServiceException e) {
             assert true;
         }

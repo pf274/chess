@@ -38,15 +38,11 @@ public class GameDataService extends ServiceBase {
 
     /**
      * Lists all the games in the database
-     * @param shouldFail If true, the service will throw an exception (to simulate failure in future phases)
      * @return The list of games
      * @throws ServiceException If the games could not be listed
      */
-    public ArrayList<Game> listGames(boolean shouldFail) throws ServiceException {
+    public ArrayList<Game> listGames() throws ServiceException {
         try {
-            if (shouldFail) {
-                throw new ServiceException(500, "internal server error");
-            }
             return gameDAO.getAllGames();
         } catch (DataAccessException e) {
             throw new ServiceException(e.statusCode, e.statusMessage);

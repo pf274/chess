@@ -51,7 +51,7 @@ public class GameDataHandler extends HandlerBase {
     public Route getGameList = (req, res) -> {
         try {
             // run service
-            ArrayList<Game> games = this.service.listGames(false);
+            ArrayList<Game> games = this.service.listGames();
             // return successful response
             ResponseMapper.listGamesResponse(games, res);
         } catch (ServiceException e) {
