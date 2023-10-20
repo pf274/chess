@@ -8,7 +8,13 @@ import java.util.HashSet;
 
 public abstract class ChessPieceImpl implements ChessPiece {
 
+    /**
+     * The team color of this piece
+     */
     public ChessGame.TeamColor color;
+    /**
+     * The type of chess piece
+     */
     public ChessPiece.PieceType type;
 
     /**
@@ -68,12 +74,10 @@ public abstract class ChessPieceImpl implements ChessPiece {
                 // king is castling, since it moved more than one column over
                 if (potentialMove.getEndPosition().getColumn() == 3) {
                     // move left knight
-                    boardCopy.removePiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 1));
-                    boardCopy.addPiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 4), new Rook(selectedPiece.getTeamColor()));
+                    boardCopy.movePiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 1), new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 4));
                 } else {
                     // move right knight
-                    boardCopy.removePiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 8));
-                    boardCopy.addPiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 6), new Rook(selectedPiece.getTeamColor()));
+                    boardCopy.movePiece(new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 8), new ChessPositionImpl(potentialMove.getEndPosition().getRow(), 6));
                 }
             }
         }
@@ -84,6 +88,9 @@ public abstract class ChessPieceImpl implements ChessPiece {
         return !dangerous;
     }
 
+    /**
+     * Enum for the 8 directions a piece can move in
+     */
     public enum direction {
         UP,
         DOWN,
@@ -96,7 +103,7 @@ public abstract class ChessPieceImpl implements ChessPiece {
     }
 
     /**
-     * Checks a ray in a given direction and adds spaces to valid moves if the space is empty or contains an enemy piece. Stops once it hits the edge of the board or a piece.
+     * Checks the spaces in a given direction and adds spaces to valid moves if the space is empty or contains an enemy piece. Stops once it hits the edge of the board or a piece.
      * @param board the chess board
      * @param position the position of this piece
      * @param dir the direction to check
@@ -169,7 +176,7 @@ public abstract class ChessPieceImpl implements ChessPiece {
     }
 
     /**
-     * Checks all potential positions and adds them to valid moves if the space is empty or contains an enemy piece
+     * Checks all specified positions and adds them to valid moves if the space is empty or contains an enemy piece
      * @param board the chess board
      * @param myPosition the position of this piece
      * @param validMoves the collection of valid moves

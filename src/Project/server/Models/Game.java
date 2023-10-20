@@ -2,6 +2,8 @@ package server.Models;
 
 import chess.ChessGame;
 
+import java.util.ArrayList;
+
 /**
  * Represents a game
  */
@@ -22,6 +24,8 @@ public class Game {
      */
     public String blackUsername;
 
+    private final ArrayList<String> spectators = new ArrayList<>();
+
     /**
      * The game's name
      */
@@ -41,5 +45,13 @@ public class Game {
         this.gameID = gameID;
         this.gameName = gameName;
         // TODO: Initialize game
+    }
+
+    /**
+     * Adds a spectator to the game
+     * @param username the username of the spectator
+     */
+    public void addSpectator(String username) {
+        spectators.add(username);
     }
 }

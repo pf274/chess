@@ -19,7 +19,7 @@ public class Server {
      * The default route handler, which is used to handle requests that don't match any of the other routes.
      */
     private static final Route defaultRouteHandler = (req, res) -> {
-        ResponseMapper.exceptionResponse(404, "path not found.");
+        ResponseMapper.exceptionResponse(404, "path not found.", res);
         return null;
     };
 
@@ -114,11 +114,7 @@ public class Server {
             response.type("application/json");
         });
 
-        // handle exceptions
-        exception(APIException.class, (exception, request, response) -> {
-            response.status(500);
-            response.body(exception.getMessage());
-        });
+        // handle uncaught exceptions
         exception(Exception.class, (exception, request, response) -> {
           response.status(500);
           response.body(exception.getMessage());

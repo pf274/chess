@@ -8,11 +8,29 @@ import java.util.HashSet;
 
 public class ChessBoardImpl implements ChessBoard {
 
+    /**
+     * Indicates that white can castle on the left
+     */
     public boolean whiteLeftCastlePossible = true;
+    /**
+     * Indicates that white can castle on the right
+     */
     public boolean whiteRightCastlePossible = true;
+    /**
+     * Indicates that black can castle on the left
+     */
     public boolean blackLeftCastlePossible = true;
+    /**
+     * Indicates that black can castle on the right
+     */
     public boolean blackRightCastlePossible = true;
+    /**
+     * Indicates the position where a pawn just moved two spaces (the position where an en passant can be performed)
+     */
     public ChessPosition enPassantMove = null;
+    /**
+     * The chess board
+     */
     private ChessPieceImpl[][] board = new ChessPieceImpl[8][8];
 
     /**
@@ -26,7 +44,7 @@ public class ChessBoardImpl implements ChessBoard {
                 var position = new ChessPositionImpl(row, col);
                 var piece = getPiece(position);
                 if (piece != null) {
-                    ChessPieceImpl newPiece = (ChessPieceImpl) ChessPieceImpl.createPiece(piece.getPieceType(), piece.getTeamColor());
+                    var newPiece = ChessPieceImpl.createPiece(piece.getPieceType(), piece.getTeamColor());
                     newBoard.addPiece(position, newPiece);
                 }
             }
@@ -52,7 +70,7 @@ public class ChessBoardImpl implements ChessBoard {
     }
 
     /**
-     * Initializes the castling variables
+     * Initializes the castling variables (only if castling can be performed)
      */
     private void initializeCastling() {
         var whiteLeftRook = board[0][0];
@@ -169,6 +187,7 @@ public class ChessBoardImpl implements ChessBoard {
         whiteLeftCastlePossible = true;
         blackRightCastlePossible = true;
         blackLeftCastlePossible = true;
+        enPassantMove = null;
     }
 
     @Override
@@ -228,7 +247,7 @@ public class ChessBoardImpl implements ChessBoard {
                     if (foundPiece.getTeamColor() != teamColor) {
                         var validMoves = foundPiece.pieceMoves(this, position);
                         for (ChessMove validMove : validMoves) {
-                            if (validMove.getEndPosition().getRow() == testPosition.getRow() && validMove.getEndPosition().getColumn() == testPosition.getColumn()) {
+                            if (ChessPositionImpl.positionsEqual(validMove.getEndPosition(), testPosition)) {
                                 perpetrators.add(position);
                             }
                         }

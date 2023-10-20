@@ -9,10 +9,12 @@ public class ChessPositionImpl implements ChessPosition {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChessPositionImpl that = (ChessPositionImpl) o;
-        return row == that.row && column == that.column;
+        if (o instanceof ChessPosition) {
+            ChessPositionImpl convertedO = (ChessPositionImpl) o;
+            return row == convertedO.row && column == convertedO.column;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -47,6 +49,10 @@ public class ChessPositionImpl implements ChessPosition {
     public ChessPositionImpl(int row, int column) {
         this.row = row;
         this.column = column;
+    }
+
+    public static boolean positionsEqual(ChessPosition position1, ChessPosition position2) {
+        return position1.getRow() == position2.getRow() && position1.getColumn() == position2.getColumn();
     }
 
 }

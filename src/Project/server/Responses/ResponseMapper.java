@@ -76,17 +76,6 @@ public class ResponseMapper {
     }
 
     /**
-     * Sets the response for a leave game request
-     * @param res the Spark response object
-     */
-    public static void leaveGameResponse(Response res) {
-        HashMap<String, Integer> responseValues = new HashMap<>();
-        APIResponse apiResponse = new APIResponse(200, responseValues);
-        res.status(apiResponse.statusCode);
-        res.body(apiResponse.statusMessage);
-    }
-
-    /**
      * Sets the response for a list games request
      * @param games the list of games
      * @param res the Spark response object

@@ -44,18 +44,4 @@ public class JoinGameService extends ServiceBase {
             throw new ServiceException(500, e.getMessage());
         }
     }
-
-    /**
-     * Removes the user with the given username from the game with the given GameID.
-     * @param gameID the ID of the game to leave
-     * @param username the username of the user to leave
-     * @throws ServiceException If the user could not leave the game
-     */
-    public void leaveGame(int gameID, String username) throws ServiceException {
-        try {
-            gameDAO.removeUserFromGame(gameID, username);
-        } catch (DataAccessException e) {
-            throw new ServiceException(500, e.getMessage());
-        }
-    }
 }

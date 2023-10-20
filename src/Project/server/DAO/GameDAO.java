@@ -86,10 +86,10 @@ public class GameDAO implements DAO {
     public void removeUserFromGame(int gameID, String username) throws DataAccessException {
         for (var game : games) {
             if (game.gameID == gameID) {
-                if (game.whiteUsername.equals(username)) {
+                if (game.whiteUsername != null && game.whiteUsername.equals(username)) {
                     game.whiteUsername = null;
                     return;
-                } else if (game.blackUsername.equals(username)) {
+                } else if (game.blackUsername != null && game.blackUsername.equals(username)) {
                     game.blackUsername = null;
                     return;
                 }
@@ -123,7 +123,7 @@ public class GameDAO implements DAO {
                         throw new DataAccessException(500, "Black player already exists");
                     }
                 } else {
-                    // TODO: handle spectators
+                    game.addSpectator(username);
                     return;
                 }
             }

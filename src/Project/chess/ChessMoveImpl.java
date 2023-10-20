@@ -5,9 +5,17 @@ import java.util.Objects;
 
 public class ChessMoveImpl implements ChessMove {
 
+    /**
+     * The starting position
+     */
     ChessPosition startingPosition;
+    /**
+     * The ending position
+     */
     ChessPosition endingPosition;
-
+    /**
+     * The piece to promote to
+     */
     ChessPiece.PieceType promotionPiece;
 
     /**
