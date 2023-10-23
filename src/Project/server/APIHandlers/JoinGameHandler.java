@@ -18,7 +18,7 @@ public class JoinGameHandler extends HandlerBase {
     /**
      * The service instance that this handler will use to handle requests.
      */
-    private JoinGameService service = null;
+    private JoinGameService service;
 
     /**
      * The route handler that handles the join game request.

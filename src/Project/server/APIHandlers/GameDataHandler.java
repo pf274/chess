@@ -18,7 +18,7 @@ public class GameDataHandler extends HandlerBase {
     /**
      * The service instance that this handler will use to handle requests.
      */
-    private GameDataService service = null;
+    private GameDataService service;
 
     /**
      * Creates a new GameDataHandler and defines its routes.

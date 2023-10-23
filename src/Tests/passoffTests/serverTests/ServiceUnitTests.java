@@ -97,6 +97,7 @@ public class ServiceUnitTests {
         try {
             gameDataService.gameDAO = null; // this should cause an exception
             gameDataService.listGames();
+            assert false;
         } catch (Exception e) {
             assert true;
         }
