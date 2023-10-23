@@ -117,7 +117,7 @@ public class Server {
         // joinGameHandler routes
         put("/game", serverInstance.joinGameHandler.joinGame);
 
-        // default routes (most are caught by authorization)
+        // default routes
         path("*", () -> {
             get("", defaultRouteHandler);
             post("", defaultRouteHandler);

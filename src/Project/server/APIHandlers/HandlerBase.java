@@ -29,19 +29,11 @@ public class HandlerBase {
     }
 
     /**
-     * Uses Gson to parse the request body
-     * @param rawBody the body to parse
-     * @return the parsed body
+     * Extracts the auth token from the spark request
+     * @param req the spark request
+     * @param authDAO the authDAO to use to get the auth token
+     * @return the auth token
      */
-    public ArrayList parseBodyToArray(String rawBody) {
-        var type = ArrayList.class;
-        GsonBuilder builder = new GsonBuilder();
-        builder.setPrettyPrinting();
-        Gson gson = builder.create();
-        var result = gson.fromJson(rawBody, type);
-        return Objects.requireNonNullElseGet(result, ArrayList::new);
-    }
-
     public static AuthToken getAuthToken(Request req, AuthDAO authDAO) {
         String authTokenString = req.headers("Authorization");
         if (authTokenString == null) {
