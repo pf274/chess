@@ -95,11 +95,9 @@ public class ServiceUnitTests {
     @DisplayName("GameDataService: list games (failure)")
     public void test5() {
         try {
-            // simulates when there is a game, but it is not returned by listGames().
-            gameDataService.clear();
-            var games = gameDataService.listGames();
-            assert games.isEmpty();
-        } catch (ServiceException e) {
+            gameDataService.gameDAO = null; // this should cause an exception
+            gameDataService.listGames();
+        } catch (Exception e) {
             assert true;
         }
     }

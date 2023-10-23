@@ -66,10 +66,27 @@ public class Server {
         var serverInstance = new Server();
         port(8080);
 
+        // enable CORS
+        options("/*", (req, res) -> {
+            String accessControlRequestHeaders = req.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                res.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+            String accessControlRequestMethod = req.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                res.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+            return "OK";
+        });
+
         // authorization
         before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
             String requestPath = request.pathInfo();
             String requestMethod = request.requestMethod();
+            if (Objects.equals(requestMethod, "OPTIONS")) {
+                return;
+            }
             // check authorization
             if ((Objects.equals(requestPath, "/session") || Objects.equals(requestPath, "/user")) && Objects.equals(requestMethod, "POST")) {
                 return;
@@ -99,7 +116,6 @@ public class Server {
         post("/user", serverInstance.registerHandler.register);
         // joinGameHandler routes
         put("/game", serverInstance.joinGameHandler.joinGame);
-
 
         // default routes (most are caught by authorization)
         path("*", () -> {

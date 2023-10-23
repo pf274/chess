@@ -13,14 +13,18 @@ function submit() {
 }
 
 function send(path, params, method, authToken) {
+  const port = 8080; // Specify the desired port
+  // Construct the full URL with the specified port
+  const fullURL = `http://localhost:${port}${path}`;
   params = !!params ? params : undefined;
   let errStr = '';
-  fetch(path, {
+  fetch(fullURL, {
     method: method,
     body: params,
     headers: {
       Authorization: authToken,
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
     },
   })
     .then((response) => {
