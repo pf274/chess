@@ -235,14 +235,16 @@ public class GameDAO implements DAO {
         var connection = database.getConnection();
         try {
             if (playerColor.equalsIgnoreCase("WHITE")) {
-                String command = "UPDATE gameinfo SET blackUser = NULL WHERE gameID = ?";
+                String command = "UPDATE gameinfo SET whiteUser = ? WHERE gameID = ?";
                 var preparedStatement = connection.prepareStatement(command);
-                preparedStatement.setInt(1, gameID);
+                preparedStatement.setString(1, username);
+                preparedStatement.setInt(2, gameID);
                 preparedStatement.execute();
             } else if (playerColor.equalsIgnoreCase("BLACK")) {
-                String command = "UPDATE gameinfo SET blackUser = NULL WHERE gameID = ?";
+                String command = "UPDATE gameinfo SET blackUser = ? WHERE gameID = ?";
                 var preparedStatement = connection.prepareStatement(command);
-                preparedStatement.setInt(1, gameID);
+                preparedStatement.setString(1, username);
+                preparedStatement.setInt(2, gameID);
                 preparedStatement.execute();
             } else {
                 String command = "INSERT INTO gamespectators (gameID, username) VALUES (?, ?)";
