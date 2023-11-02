@@ -1,5 +1,7 @@
 package server.DAO;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -25,10 +27,7 @@ import java.util.LinkedList;
  */
 public class Database {
 
-    // FIXME: Change these fields, if necessary, to match your database configuration
     public static final String DB_NAME = "chess";
-    private static final String DB_USERNAME = "laseredface";
-    private static final String DB_PASSWORD = "2a79bb26qz9";
 
     private static final String CONNECTION_URL = "jdbc:mysql://localhost:3306";
 
@@ -46,6 +45,9 @@ public class Database {
     synchronized public Connection getConnection() throws DataAccessException {
         try {
             Connection connection;
+            Dotenv dotenv = Dotenv.load();
+            String DB_USERNAME = dotenv.get("SQL_USERNAME");
+            String DB_PASSWORD = dotenv.get("SQL_PASSWORD");
             if (connections.isEmpty()) {
                 connection = DriverManager.getConnection(CONNECTION_URL, DB_USERNAME, DB_PASSWORD);
                 connection.setCatalog(DB_NAME);

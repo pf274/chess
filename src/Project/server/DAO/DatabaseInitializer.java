@@ -1,6 +1,7 @@
 package server.DAO;
 
 import chess.ChessGameImpl;
+import io.github.cdimascio.dotenv.Dotenv;
 import server.Models.Game;
 
 import java.sql.DriverManager;
@@ -58,7 +59,10 @@ public class DatabaseInitializer {
 
     public static void main(String[] args) throws Exception {
         try {
-            var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "laseredface", "2a79bb26qz9");
+            Dotenv dotenv = Dotenv.load();
+            String username = dotenv.get("SQL_USERNAME");
+            String password = dotenv.get("SQL_PASSWORD");
+            var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", username, password);
             // execute each command from sqlCommands in order
             for (String sqlCommand : sqlCommands) {
                 var preparedStatement = conn.prepareStatement(sqlCommand);
