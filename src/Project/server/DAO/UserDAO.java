@@ -32,7 +32,8 @@ public class UserDAO implements DAO {
                         resultSet.getString("email")
                 );
             }
-            throw new DataAccessException(500, "User with username '" + username + "' not found");
+//            throw new DataAccessException(500, "User with username '" + username + "' not found");
+            return null;
         } catch (SQLException e) {
             database.returnConnection(connection);
             throw new DataAccessException(500, e.getMessage());

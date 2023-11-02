@@ -1,6 +1,8 @@
 package server.Models;
 
+import chess.ChessBoardImpl;
 import chess.ChessGame;
+import chess.ChessGameImpl;
 
 import java.util.ArrayList;
 
@@ -24,8 +26,6 @@ public class Game {
      */
     public String blackUsername;
 
-    private final ArrayList<String> spectators = new ArrayList<>();
-
     /**
      * The game's name
      */
@@ -34,7 +34,7 @@ public class Game {
     /**
      * The chess game instance
      */
-    public ChessGame game;
+    public ChessGameImpl game;
     public int moveNumber = 0;
 
     /**
@@ -45,14 +45,8 @@ public class Game {
     public Game(int gameID, String gameName) {
         this.gameID = gameID;
         this.gameName = gameName;
-        // TODO: Initialize game
-    }
-
-    /**
-     * Adds a spectator to the game
-     * @param username the username of the spectator
-     */
-    public void addSpectator(String username) {
-        spectators.add(username);
+        game = new ChessGameImpl();
+        game.getBoard().resetBoard();
+//        System.out.println(game.getGameAsString());
     }
 }

@@ -26,6 +26,7 @@ public class ServiceUnitTests {
         loginService = new LoginService(authDAO, userDAO, gameDAO);
         registerService = new RegisterService(authDAO, userDAO, gameDAO);
         try {
+            gameDataService.clear();
             existingUser = registerService.register("testUser", "testPassword", "testEmail@gmail.com");
         } catch (ServiceException e) {
             assert false;

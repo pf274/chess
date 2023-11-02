@@ -1,12 +1,13 @@
 package server.DAO;
 
+import chess.ChessGameImpl;
+import server.Models.Game;
+
 import java.sql.DriverManager;
 import java.sql.Connection;
 
 public class DatabaseInitializer {
-
-    // TODO: SET THIS TO THE DEFAULT GAME STATE
-    public static String defaultGameState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+    public static String defaultGameState = (new Game(1234, "default")).game.getGameAsString();
 
     private static final String[] sqlCommands = {
             // create chess database
@@ -21,6 +22,7 @@ public class DatabaseInitializer {
                     "  `gameName` VARCHAR(45) NOT NULL,\n" +
                     "  `turn` VARCHAR(5) NOT NULL DEFAULT \"WHITE\",\n" +
                     "  `gameState` VARCHAR(100) NOT NULL DEFAULT \"" + defaultGameState +  "\",\n" +
+                    "  `moveNumber` int NOT NULL DEFAULT 0,\n" +
                     "  PRIMARY KEY (`gameID`));",
             // if chess.gameHistory table exists, drop it
             "DROP TABLE IF EXISTS `chess`.`gamehistory`;",
@@ -57,14 +59,14 @@ public class DatabaseInitializer {
     public static void main(String[] args) throws Exception {
         try {
             var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "laseredface", "2a79bb26qz9");
-//            conn.setCatalog("chess");
-            // execute each command from sqlCommand in order
+            // execute each command from sqlCommands in order
             for (String sqlCommand : sqlCommands) {
                 var preparedStatement = conn.prepareStatement(sqlCommand);
                 preparedStatement.execute();
+                System.out.println("Executed \"" + sqlCommand + "\"");
             }
         } catch (Exception e) {
-            System.out.println("Error connecting to database. Please make sure that the database is running.");
+            System.out.println("Error initializing database. Please make sure that the database is running.");
             System.out.println(e.getMessage());
             throw e;
         }

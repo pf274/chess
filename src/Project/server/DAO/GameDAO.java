@@ -4,6 +4,7 @@ import chess.ChessBoard;
 import chess.ChessBoardImpl;
 import server.Models.Game;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -14,6 +15,24 @@ import java.util.Objects;
 public class GameDAO implements DAO {
     private final Database database = Database.getInstance();
 
+    /**
+     * Loads a game from a result set.
+     * @param resultSet the result set
+     * @return the game
+     * @throws SQLException if loading the game fails
+     */
+    private static Game loadGameFromResultSet(ResultSet resultSet) throws SQLException {
+            var gameID = resultSet.getInt("gameID");
+            var gameName = resultSet.getString("gameName");
+            var game = new Game(gameID, gameName);
+            game.blackUsername = resultSet.getString("blackUser");
+            game.whiteUsername = resultSet.getString("whiteUser");
+            game.moveNumber = resultSet.getInt("moveNumber");
+            // load the game
+            var gameState = resultSet.getString("gameState");
+            game.game.loadGameFromString(gameState);
+            return game;
+    }
     /**
      * Gets a game from the list of games, given the game ID.
      * @param gameID the game ID
@@ -29,12 +48,7 @@ public class GameDAO implements DAO {
             var resultSet = preparedStatement.executeQuery();
             database.returnConnection(connection);
             if (resultSet.next()) {
-                var gameName = resultSet.getString("gameName");
-                // TODO: get the rest of the columns
-                var game = new Game(gameID, gameName);
-                // TODO: set the board
-                ChessBoardImpl chessBoard = new ChessBoardImpl();
-                return game;
+                return loadGameFromResultSet(resultSet);
             }
             throw new DataAccessException(500, "Game with ID " + gameID + " not found");
         } catch (SQLException e) {
@@ -58,20 +72,20 @@ public class GameDAO implements DAO {
             var resultSet = preparedStatement.executeQuery();
             database.returnConnection(connection);
             if (resultSet.next()) {
-                var gameID = resultSet.getInt("gameID");
-                // TODO: get the rest of the columns
-                var game = new Game(gameID, gameName);
-                // TODO: set the board
-                ChessBoardImpl chessBoard = new ChessBoardImpl();
-                return game;
+                return loadGameFromResultSet(resultSet);
             }
-            throw new DataAccessException(500, "Game with Name " + gameName + " not found");
+            return null;
         } catch (SQLException e) {
             database.returnConnection(connection);
             throw new DataAccessException(500, e.getMessage());
         }
     }
 
+    /**
+     * Saves a snapshot of the game to the database.
+     * @param game the game
+     * @throws DataAccessException if saving the game fails
+     */
     public void addGameHistory(Game game) throws DataAccessException {
         var connection = database.getConnection();
         try {
@@ -79,8 +93,7 @@ public class GameDAO implements DAO {
             var preparedStatement = connection.prepareStatement(command);
             preparedStatement.setInt(1, game.gameID);
             preparedStatement.setInt(2, game.moveNumber);
-            // TODO: get the game state
-            preparedStatement.setString(3, "");
+            preparedStatement.setString(3, game.game.getGameAsString());
             preparedStatement.execute();
             database.returnConnection(connection);
         } catch (SQLException e) {
@@ -109,12 +122,7 @@ public class GameDAO implements DAO {
             var resultSet = preparedStatement.executeQuery();
             database.returnConnection(connection);
             if (resultSet.next()) {
-                var gameID = resultSet.getInt("gameID");
-                var gameState = resultSet.getString("gameState");
-                // create the game object
-                var game = new Game(gameID, gameName);
-                // TODO: set the board
-                // create a new game history entry
+                Game game = loadGameFromResultSet(resultSet);
                 addGameHistory(game);
                 return game;
             }
@@ -162,12 +170,7 @@ public class GameDAO implements DAO {
             database.returnConnection(connection);
             var games = new ArrayList<Game>();
             while (resultSet.next()) {
-                var gameID = resultSet.getInt("gameID");
-                var gameName = resultSet.getString("gameName");
-                var gameState = resultSet.getString("gameState");
-                // TODO: get the rest of the columns
-                var game = new Game(gameID, gameName);
-                // TODO: set the board
+                Game game = loadGameFromResultSet(resultSet);
                 games.add(game);
             }
             return games;

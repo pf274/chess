@@ -4,6 +4,7 @@ import chess.Pieces.*;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import static chess.ChessPieceImpl.isSafeMove;
 
@@ -360,5 +361,130 @@ public class ChessGameImpl implements ChessGame {
     @Override
     public ChessBoard getBoard() {
         return boardInstance;
+    }
+
+
+    public String getGameAsString() {
+        StringBuilder sb = new StringBuilder();
+        for (int row = 8; row >= 1; row--) {
+            for (int col = 1; col <= 8; col++) {
+                var position = new ChessPositionImpl(row, col);
+                var foundPiece = boardInstance.getPiece(position);
+                if (foundPiece == null) {
+                    sb.append("_");
+                } else {
+                    var pieceType = foundPiece.getPieceType();
+                    var pieceColor = foundPiece.getTeamColor();
+                    char character = switch (pieceType) {
+                        case ROOK -> 'R';
+                        case KNIGHT -> 'N';
+                        case BISHOP -> 'B';
+                        case QUEEN -> 'Q';
+                        case KING -> 'K';
+                        default -> 'P';
+                    };
+                    if (pieceColor == ChessGame.TeamColor.BLACK) {
+                        character = Character.toLowerCase(character);
+                    }
+                    sb.append(character);
+                }
+            }
+//            if (row != 1) {
+//                sb.append("/");
+//            }
+        }
+        // add turn
+        sb.append(" ");
+        sb.append(turn == ChessGame.TeamColor.WHITE ? "w" : "b");
+        // add castling
+        sb.append(" ");
+        if (boardInstance.whiteLeftCastlePossible) {
+            sb.append("K");
+        }
+        if (boardInstance.whiteRightCastlePossible) {
+            sb.append("Q");
+        }
+        if (boardInstance.blackLeftCastlePossible) {
+            sb.append("k");
+        }
+        if (boardInstance.blackRightCastlePossible) {
+            sb.append("q");
+        }
+        // add en passant
+        sb.append(" ");
+        if (boardInstance.enPassantMove != null) {
+            char column = (char) ('a' + boardInstance.enPassantMove.getColumn() - 1);
+            sb.append(column);
+            sb.append(boardInstance.enPassantMove.getRow());
+        } else {
+            sb.append("-");
+        }
+        return sb.toString();
+    }
+
+    public void loadGameFromString(String gameState) {
+        String boardRegex = "([rnbqkpRNBQKP_]+)";
+        String turnRegex = " ([wb])";
+        String castlingRegex = " ([KQkq]+)";
+        String enPassantRegex = " ([a-h][1-8]|-)";
+        String fullRegex = boardRegex + turnRegex + castlingRegex + enPassantRegex;
+        if (!gameState.matches(fullRegex)) {
+            return;
+        }
+        // use regex to get the parts as strings
+        Pattern pattern = Pattern.compile(fullRegex);
+        var matcher = pattern.matcher(gameState);
+        if (matcher.matches()) {
+            var boardString = matcher.group(1);
+            var turnString = matcher.group(2);
+            var castlingString = matcher.group(3);
+            var enPassantString = matcher.group(4);
+            System.out.println("Board: " + boardString);
+            System.out.println("Current Turn: " + turnString);
+            System.out.println("Castling Rights: " + castlingString);
+            System.out.println("En Passant Target: " + enPassantString);
+            // set the board
+            var loadedBoard = new ChessBoardImpl();
+            var boardIndex = 0;
+            for (int row = 8; row >= 1; row--) {
+                for (int col = 1; col <= 8; col++) {
+                    var position = new ChessPositionImpl(row, col);
+                    var character = boardString.charAt(boardIndex);
+                    if (character != '_') {
+                        var pieceType = switch (Character.toLowerCase(character)) {
+                            case 'r' -> ChessPiece.PieceType.ROOK;
+                            case 'n' -> ChessPiece.PieceType.KNIGHT;
+                            case 'b' -> ChessPiece.PieceType.BISHOP;
+                            case 'q' -> ChessPiece.PieceType.QUEEN;
+                            case 'k' -> ChessPiece.PieceType.KING;
+                            default -> ChessPiece.PieceType.PAWN;
+                        };
+                        var pieceColor = Character.isLowerCase(character) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+                        var newPiece = ChessPieceImpl.createPiece(pieceType, pieceColor);
+                        loadedBoard.addPiece(position, newPiece);
+                    }
+                    boardIndex++;
+                }
+            }
+            // set the turn
+            turn = turnString.equals("w") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            // set the castling rights
+            loadedBoard.whiteLeftCastlePossible = castlingString.contains("K");
+            loadedBoard.whiteRightCastlePossible = castlingString.contains("Q");
+            loadedBoard.blackLeftCastlePossible = castlingString.contains("k");
+            loadedBoard.blackRightCastlePossible = castlingString.contains("q");
+            // set the en passant target
+            if (enPassantString.equals("-")) {
+                loadedBoard.enPassantMove = null;
+            } else {
+                var column = enPassantString.charAt(0);
+                var row = enPassantString.charAt(1);
+                var columnNumber = column - 'a' + 1;
+                var rowNumber = row - '0';
+                loadedBoard.enPassantMove = new ChessPositionImpl(rowNumber, columnNumber);
+            }
+            setBoard(loadedBoard);
+            System.out.println("Board loaded");
+        }
     }
 }
