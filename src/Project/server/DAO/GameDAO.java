@@ -48,7 +48,7 @@ public class GameDAO implements DAO {
             if (resultSet.next()) {
                 return loadGameFromResultSet(resultSet);
             }
-            throw new DataAccessException(500, "Game with ID " + gameID + " not found");
+            return null;
         } catch (SQLException e) {
             database.returnConnection(connection);
             throw new DataAccessException(500, e.getMessage());
@@ -232,23 +232,23 @@ public class GameDAO implements DAO {
     public void addUserToGame(int gameID, String username, String playerColor) throws DataAccessException {
         var connection = database.getConnection();
         try {
-            if (playerColor.equalsIgnoreCase("WHITE")) {
+            if (playerColor == null) {
+                String command = "INSERT INTO gamespectators (gameID, username) VALUES (?, ?)";
+                var preparedStatement = connection.prepareStatement(command);
+                preparedStatement.setInt(1, gameID);
+                preparedStatement.setString(2, username);
+                preparedStatement.execute();
+            } else if (playerColor.equalsIgnoreCase("WHITE")) {
                 String command = "UPDATE gameinfo SET whiteUser = ? WHERE gameID = ?";
                 var preparedStatement = connection.prepareStatement(command);
                 preparedStatement.setString(1, username);
                 preparedStatement.setInt(2, gameID);
                 preparedStatement.execute();
-            } else if (playerColor.equalsIgnoreCase("BLACK")) {
+            } else {
                 String command = "UPDATE gameinfo SET blackUser = ? WHERE gameID = ?";
                 var preparedStatement = connection.prepareStatement(command);
                 preparedStatement.setString(1, username);
                 preparedStatement.setInt(2, gameID);
-                preparedStatement.execute();
-            } else {
-                String command = "INSERT INTO gamespectators (gameID, username) VALUES (?, ?)";
-                var preparedStatement = connection.prepareStatement(command);
-                preparedStatement.setInt(1, gameID);
-                preparedStatement.setString(2, username);
                 preparedStatement.execute();
             }
             database.returnConnection(connection);
