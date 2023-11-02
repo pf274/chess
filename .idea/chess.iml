@@ -40,5 +40,7 @@
         <jarDirectory url="file://$MODULE_DIR$/libs" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" exported="" name="couchbase.jdbc.n1ql" level="project" />
+    <orderEntry type="library" exported="" name="mysql.connector.j" level="project" />
   </component>
 </module>

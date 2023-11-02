@@ -2,6 +2,7 @@ package server;
 
 import server.APIHandlers.*;
 import server.DAO.AuthDAO;
+import server.DAO.Database;
 import server.DAO.GameDAO;
 import server.DAO.UserDAO;
 import server.Responses.ResponseMapper;

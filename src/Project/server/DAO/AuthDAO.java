@@ -1,16 +1,15 @@
 package server.DAO;
 
 import server.Models.AuthToken;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
  * The AuthDAO class is responsible for storing and retrieving auth tokens.
  */
 public class AuthDAO implements DAO {
-    /**
-     * The list of auth tokens.
-     */
-    private final ArrayList<AuthToken> authTokens = new ArrayList<>();
+    private final Database database = Database.getInstance();
 
     /**
      * Adds an auth token to the list of auth tokens.
@@ -18,12 +17,20 @@ public class AuthDAO implements DAO {
      * @throws DataAccessException if the auth token already exists
      */
     public void addAuthToken(AuthToken authToken) throws DataAccessException {
-        for (AuthToken token : authTokens) {
-            if (token.authToken.equals(authToken.authToken)) {
-                throw new DataAccessException(500, "Auth token " + authToken.authToken + " already exists");
-            }
+        var connection = database.getConnection();
+        try {
+            var command = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
+            var preparedStatement = connection.prepareStatement(command);
+
+            preparedStatement.setString(1, authToken.authToken);
+            preparedStatement.setString(2, authToken.username);
+
+            preparedStatement.executeUpdate();
+            database.returnConnection(connection);
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
         }
-        authTokens.add(authToken);
     }
 
     /**
@@ -31,7 +38,16 @@ public class AuthDAO implements DAO {
      * @throws DataAccessException if clearing the list of auth tokens fails
      */
     public void clear() throws DataAccessException {
-        authTokens.clear();
+        var connection = database.getConnection();
+        try {
+            var command = "DELETE FROM auth";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.execute();
+            database.returnConnection(connection);
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
+        }
     }
 
     /**
@@ -39,13 +55,26 @@ public class AuthDAO implements DAO {
      * @param authToken the auth token string
      * @return the auth token
      */
-    public AuthToken getAuthToken(String authToken) {
-        for (AuthToken token : authTokens) {
-            if (token.authToken.equals(authToken)) {
-                return token;
+    public AuthToken getAuthToken(String authToken) throws DataAccessException {
+        var connection = database.getConnection();
+
+        try {
+            var command = "SELECT * FROM auth WHERE authToken = ?";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.setString(1, authToken);
+            var resultSet = preparedStatement.executeQuery();
+            database.returnConnection(connection);
+            AuthToken returnToken = null;
+            if (resultSet.next()) {
+                var username = resultSet.getString("username");
+                returnToken = new AuthToken(username);
+                returnToken.authToken = authToken;
             }
+            return returnToken;
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
         }
-        return null;
     }
 
     /**
@@ -55,12 +84,25 @@ public class AuthDAO implements DAO {
      * @throws DataAccessException if the auth token does not exist
      */
     public AuthToken getAuthTokenByUsername(String username) throws DataAccessException {
-        for (AuthToken token : authTokens) {
-            if (token.username.equals(username)) {
-                return token;
+        var connection = database.getConnection();
+        try {
+            var command = "SELECT * FROM auth WHERE username = ?";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.setString(1, username);
+            var resultSet = preparedStatement.executeQuery();
+            database.returnConnection(connection);
+            if (resultSet.next()) {
+                var authToken = resultSet.getString("authToken");
+                var returnToken = new AuthToken(username);
+                returnToken.authToken = authToken;
+                return returnToken;
+            } else {
+                throw new DataAccessException(500, "Auth token for username " + username + " not found");
             }
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
         }
-        throw new DataAccessException(500, "Auth token for user " + username + " not found");
     }
 
     /**
@@ -69,12 +111,16 @@ public class AuthDAO implements DAO {
      * @throws DataAccessException if the auth token does not exist
      */
     public void deleteAuthToken(String authToken) throws DataAccessException {
-        for (int i = 0; i < authTokens.size(); i++) {
-            if (authTokens.get(i).authToken.equals(authToken)) {
-                authTokens.remove(i);
-                return;
-            }
+        var connection = database.getConnection();
+        try {
+            var command = "DELETE FROM auth WHERE authToken = ?";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.setString(1, authToken);
+            preparedStatement.execute();
+            database.returnConnection(connection);
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
         }
-        throw new DataAccessException(500, "Auth token " + authToken + " not found");
     }
 }

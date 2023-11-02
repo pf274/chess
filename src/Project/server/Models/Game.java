@@ -35,6 +35,7 @@ public class Game {
      * The chess game instance
      */
     public ChessGame game;
+    public int moveNumber = 0;
 
     /**
      * Creates a new game

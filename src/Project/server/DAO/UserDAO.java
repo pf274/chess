@@ -1,6 +1,8 @@
 package server.DAO;
 
 import server.Models.User;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -8,23 +10,33 @@ import java.util.ArrayList;
  */
 public class UserDAO implements DAO {
 
-    /**
-     * The list of users.
-     */
-    private final ArrayList<User> users = new ArrayList<>();
+    private final Database database = Database.getInstance();
 
     /**
      * Gets a user from the list of users, given the username.
      * @param username the username
      * @return the user
      */
-    public User getUser(String username) {
-        for (User user : users) {
-            if (user.username.equals(username)) {
-                return user;
+    public User getUser(String username) throws DataAccessException {
+        var connection = database.getConnection();
+        try {
+            var command = "SELECT * FROM userinfo WHERE username = ?";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.setString(1, username);
+            var resultSet = preparedStatement.executeQuery();
+            database.returnConnection(connection);
+            if (resultSet.next()) {
+                return new User(
+                        resultSet.getString("username"),
+                        resultSet.getString("password"),
+                        resultSet.getString("email")
+                );
             }
+            throw new DataAccessException(500, "User with username '" + username + "' not found");
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
         }
-        return null;
     }
 
     /**
@@ -35,16 +47,19 @@ public class UserDAO implements DAO {
      * @throws DataAccessException if the user already exists
      */
     public void addUser(String username, String password, String email) throws DataAccessException {
-        for (User u : users) {
-            if (u.username.equals(username)) {
-                throw new DataAccessException(500, "User with username '" + username + "' already exists");
-            }
-            if (u.email.equals(email)) {
-                throw new DataAccessException(500, "User with email '" + email + "' already exists");
-            }
+        var connection = database.getConnection();
+        try {
+            var command = "INSERT INTO userinfo (username, password, email) VALUES (?, ?, ?)";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.setString(3, email);
+            preparedStatement.executeUpdate();
+            database.returnConnection(connection);
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
         }
-        User user = new User(username, password, email);
-        users.add(user);
     }
 
     /**
@@ -52,6 +67,15 @@ public class UserDAO implements DAO {
      * @throws DataAccessException if clearing the list of users fails
      */
     public void clear() throws DataAccessException {
-        users.clear();
+        var connection = database.getConnection();
+        try {
+            var command = "DELETE FROM userinfo";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.execute();
+            database.returnConnection(connection);
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
+        }
     }
 }

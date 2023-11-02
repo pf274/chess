@@ -10,6 +10,7 @@ import server.Services.ServiceException;
 import spark.Route;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * This class is used to handle the API requests that are related to game data, such as resetting the database.
@@ -69,7 +70,7 @@ public class GameDataHandler extends HandlerBase {
             HashMap body = parseBodyToMap(req.body());
             String gameName = (String) body.get("gameName");
             if (gameName == null) {
-                gameName = "Game " + (this.service.gameDAO.games.size() + 1);
+                gameName = "Game " + UUID.randomUUID();
             }
             // run service
             Game newGame = this.service.createGame(gameName);

@@ -3,6 +3,7 @@ package server.APIHandlers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import server.DAO.AuthDAO;
+import server.DAO.DataAccessException;
 import server.Models.AuthToken;
 import spark.Request;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class HandlerBase {
      * @param authDAO the authDAO to use to get the auth token
      * @return the auth token
      */
-    public static AuthToken getAuthToken(Request req, AuthDAO authDAO) {
+    public static AuthToken getAuthToken(Request req, AuthDAO authDAO) throws DataAccessException {
         String authTokenString = req.headers("Authorization");
         if (authTokenString == null) {
             return null;
