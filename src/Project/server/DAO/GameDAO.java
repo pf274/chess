@@ -1,7 +1,5 @@
 package server.DAO;
 
-import chess.ChessBoard;
-import chess.ChessBoardImpl;
 import server.Models.Game;
 
 import java.sql.ResultSet;
