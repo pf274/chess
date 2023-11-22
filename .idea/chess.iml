@@ -42,5 +42,6 @@
     </orderEntry>
     <orderEntry type="library" exported="" name="mysql.connector.j" level="project" />
     <orderEntry type="library" exported="" name="io.github.cdimascio.java.dotenv" level="project" />
+    <orderEntry type="library" exported="" name="mintshell.terminal.ncurses" level="project" />
   </component>
 </module>
