@@ -45,7 +45,7 @@ public class Database {
     synchronized public Connection getConnection() throws DataAccessException {
         try {
             Connection connection;
-            Dotenv dotenv = Dotenv.load();
+            Dotenv dotenv = Dotenv.configure().directory("../").load();
             String DB_USERNAME = dotenv.get("SQL_USERNAME");
             String DB_PASSWORD = dotenv.get("SQL_PASSWORD");
             if (connections.isEmpty()) {
