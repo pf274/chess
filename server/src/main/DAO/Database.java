@@ -45,7 +45,7 @@ public class Database {
     synchronized public Connection getConnection() throws DataAccessException {
         try {
             Connection connection;
-            Dotenv dotenv = Dotenv.configure().directory("../").load();
+            Dotenv dotenv = Dotenv.configure().directory("./").load();
             String DB_USERNAME = dotenv.get("SQL_USERNAME");
             String DB_PASSWORD = dotenv.get("SQL_PASSWORD");
             if (connections.isEmpty()) {
@@ -55,7 +55,7 @@ public class Database {
                 connection = connections.removeFirst();
             }
             return connection;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new DataAccessException(500, e.getMessage());
         }
     }

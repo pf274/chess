@@ -1,3 +1,6 @@
+package ui.menus;
+
+import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
 
@@ -11,6 +14,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class APICaller {
+
+    private static AuthToken authToken = null;
+
+    private APICaller(AuthToken authToken) {
+        APICaller.authToken = authToken;
+    }
+
+    public static APICaller withAuth(AuthToken authToken) {
+        return new APICaller(authToken);
+    }
     public static APIResponse get(String path, Map<String, String> queryParams) throws Exception {
         URI uri = buildUri(path, queryParams);
         HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
@@ -65,17 +78,29 @@ public class APICaller {
     }
 
     private static APIResponse performCall(HttpURLConnection connection) throws Exception {
-        connection.connect();
         try {
+            // Add Authorization header with bearer token
+            if (authToken != null && !authToken.authToken.isEmpty()) {
+                connection.setRequestProperty("Authorization", "Bearer " + authToken.authToken);
+            }
+            connection.connect();
             InputStream respBody = connection.getInputStream();
             InputStreamReader respBodyReader = new InputStreamReader(respBody);
             HashMap parsedBody = new Gson().fromJson(respBodyReader, HashMap.class);
-            return new APIResponse(connection.getResponseCode(), parsedBody);
+            int responseCode = connection.getResponseCode();
+            connection.disconnect();
+            return new APIResponse(responseCode, parsedBody);
         } catch (Exception e) {
             InputStream respBody = connection.getErrorStream();
-            InputStreamReader respBodyReader = new InputStreamReader(respBody);
-            HashMap parsedBody = new Gson().fromJson(respBodyReader, HashMap.class);
-            return new APIResponse(connection.getResponseCode(), parsedBody);
+            try {
+                InputStreamReader respBodyReader = new InputStreamReader(respBody);
+                HashMap parsedBody = new Gson().fromJson(respBodyReader, HashMap.class);
+                return new APIResponse(connection.getResponseCode(), parsedBody);
+            } catch (Exception e2) {
+                HashMap<String, String> unknownError = new HashMap<>();
+                unknownError.put("error", e.getMessage());
+                return new APIResponse(500, unknownError);
+            }
         }
     }
 

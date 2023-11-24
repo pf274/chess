@@ -1,7 +1,11 @@
 package ui.menus;
 
 import Models.AuthToken;
+import Responses.APIResponse;
+import com.google.gson.Gson;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -14,6 +18,8 @@ public class MenuRegister extends MenuBase {
     private AuthToken authToken;
     private boolean exited = false;
     private boolean loggedIn = false;
+    private String email;
+
     public MenuRegister(Scanner scanner) {
         super("Register", "Please enter your username and password", null, scanner);
     }
@@ -50,16 +56,44 @@ public class MenuRegister extends MenuBase {
             this.exited = true;
             return;
         }
-
         System.out.print("Reenter your password: (type exit to go back) ");
         this.reenteredPassword = getUserInput(scanner);
         if (reenteredPassword.equals("exit") || reenteredPassword.equals("e")) {
             this.exited = true;
             return;
         }
-        System.out.println("Logging in...");
-        // TODO: attempt login
-        loggedIn = true;
-        authToken = new AuthToken(username);
+        if (!Objects.equals(password, reenteredPassword)) {
+            System.out.println("Passwords do not match!");
+            return;
+        }
+        System.out.print("Email: (type exit to go back) ");
+        this.email = getUserInput(scanner);
+        if (email.equals("exit") || email.equals("e")) {
+            this.exited = true;
+            return;
+        }
+        // TODO: attempt register
+        attemptRegister();
+    }
+
+    private void attemptRegister() {
+        System.out.println("Registering...");
+        Map<String, String> body = new HashMap<>();
+        body.put("username", username);
+        body.put("password", password);
+        body.put("email", email);
+        try {
+            APIResponse response = APICaller.post("user", body);
+            HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
+            if (responseMap.containsKey("message")) {
+                System.out.println(responseMap.get("message"));
+            } else {
+                authToken = new AuthToken(username);
+                loggedIn = true;
+                System.out.println("Logged in!");
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

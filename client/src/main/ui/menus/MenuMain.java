@@ -1,6 +1,7 @@
 package ui.menus;
 
 import Models.AuthToken;
+import Responses.APIResponse;
 
 import java.util.Scanner;
 
@@ -45,6 +46,16 @@ public class MenuMain extends MenuBase {
                     System.out.println("\t" + option);
                 }
                 return this;
+            case "logout":
+            case "l":
+                boolean logoutSuccessful = attemptLogout();
+                if (logoutSuccessful) {
+                    APICaller.withAuth(null);
+                    return new MenuHome(scanner);
+                } else {
+                    return this;
+                }
+
             case "exit":
                 return null;
             default:
@@ -63,5 +74,23 @@ public class MenuMain extends MenuBase {
                 "Logout",
         }, scanner);
         this.authToken = authToken;
+    }
+
+    private boolean attemptLogout() {
+        System.out.println("Logging out...");
+        try {
+            APICaller.withAuth(authToken);
+            APIResponse response = APICaller.delete("session");
+            if (response.statusCode == 200) {
+                System.out.println("Logged out!");
+                return true;
+            } else {
+                System.out.println("Failed to log out");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
     }
 }
