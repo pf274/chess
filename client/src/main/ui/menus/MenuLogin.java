@@ -54,7 +54,8 @@ public class MenuLogin extends MenuBase {
         body.put("username", username);
         body.put("password", password);
         try {
-            APIResponse response = APICaller.post("session", body);
+            ServerFacade serverFacade = ServerFacade.getInstance();
+            APIResponse response = serverFacade.login(username, password);
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("message")) {
                 System.out.println(responseMap.get("message"));
@@ -63,7 +64,6 @@ public class MenuLogin extends MenuBase {
             } else {
                 authToken = new AuthToken(username);
                 authToken.authToken = responseMap.get("authToken").toString();
-                APICaller.withAuth(authToken);
                 loggedIn = true;
                 System.out.println("Logged in!");
             }

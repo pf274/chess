@@ -58,6 +58,8 @@ public class DatabaseInitializer {
     public static void main(String[] args) throws Exception {
         try {
             Dotenv dotenv = Dotenv.configure().directory("../").load();
+
+//            Dotenv dotenv = Dotenv.configure().directory("./").load();
             String username = dotenv.get("SQL_USERNAME");
             String password = dotenv.get("SQL_PASSWORD");
             var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", username, password);

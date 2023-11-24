@@ -50,7 +50,6 @@ public class MenuMain extends MenuBase {
             case "l":
                 boolean logoutSuccessful = attemptLogout();
                 if (logoutSuccessful) {
-                    APICaller.withAuth(null);
                     return new MenuHome(scanner);
                 } else {
                     return this;
@@ -79,8 +78,8 @@ public class MenuMain extends MenuBase {
     private boolean attemptLogout() {
         System.out.println("Logging out...");
         try {
-            APICaller.withAuth(authToken);
-            APIResponse response = APICaller.delete("session");
+            ServerFacade serverFacade = ServerFacade.getInstance();
+            APIResponse response = serverFacade.logout(authToken.authToken);
             if (response.statusCode == 200) {
                 System.out.println("Logged out!");
                 return true;

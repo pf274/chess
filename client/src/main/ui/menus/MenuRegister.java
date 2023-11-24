@@ -83,12 +83,14 @@ public class MenuRegister extends MenuBase {
         body.put("password", password);
         body.put("email", email);
         try {
-            APIResponse response = APICaller.post("user", body);
+            ServerFacade serverFacade = ServerFacade.getInstance();
+            APIResponse response = serverFacade.register(username, password, email);
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("message")) {
                 System.out.println(responseMap.get("message"));
             } else {
                 authToken = new AuthToken(username);
+                authToken.authToken = responseMap.get("authToken").toString();
                 loggedIn = true;
                 System.out.println("Logged in!");
             }
