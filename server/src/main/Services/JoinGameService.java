@@ -24,19 +24,20 @@ public class JoinGameService extends ServiceBase {
      * @param playerColor the color of the player
      * @throws ServiceException If the user could not join the game
      */
-    public void joinGame(int gameID, String username, String playerColor) throws ServiceException {
+    public String joinGame(int gameID, String username, String playerColor) throws ServiceException {
         try {
             var foundGame = gameDAO.getGameByID(gameID);
             if (foundGame == null) {
                 throw new ServiceException(400, "bad request");
             }
-            if (foundGame.blackUsername != null && Objects.equals(playerColor, "BLACK")) {
+            if (foundGame.blackUsername != null && Objects.equals(playerColor.toUpperCase(), "BLACK")) {
                 throw new ServiceException(403, "already taken");
             }
-            if (foundGame.whiteUsername != null && Objects.equals(playerColor, "WHITE")) {
+            if (foundGame.whiteUsername != null && Objects.equals(playerColor.toUpperCase(), "WHITE")) {
                 throw new ServiceException(403, "already taken");
             }
             gameDAO.addUserToGame(gameID, username, playerColor);
+            return foundGame.gameName;
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());
         }

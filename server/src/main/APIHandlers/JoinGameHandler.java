@@ -30,20 +30,20 @@ public class JoinGameHandler extends HandlerBase {
             String username = authToken.username;
             // get body variables
             var body = parseBodyToMap(req.body());
-            var gameID = body.get("gameID");
+            String gameID = (String) body.get("gameID");
             if (gameID == null) {
                 throw new ServiceException(403, "bad request");
             }
             String playerColor = (String) body.get("playerColor");
-            int gameIDAsInt = (int) Math.floor((Double) gameID);
+            int gameIDAsInt = Integer.parseInt(gameID);
             if (this.service.gameDAO.getGameByID(gameIDAsInt) == null) {
                 ResponseMapper.exceptionResponse(400, "game does not exist.", res);
                 return null;
             }
             // run service
-            this.service.joinGame(gameIDAsInt, username, playerColor);
+            String gameName = this.service.joinGame(gameIDAsInt, username, playerColor);
             // return successful response
-            ResponseMapper.joinGameResponse(res);
+            ResponseMapper.joinGameResponse(res, gameName);
         } catch (ServiceException e) {
             ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
         }

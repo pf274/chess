@@ -68,8 +68,9 @@ public class ResponseMapper {
      * Sets the response for a get game request
      * @param res the Spark response object
      */
-    public static void joinGameResponse(Response res) {
-        HashMap<String, Integer> responseValues = new HashMap<>();
+    public static void joinGameResponse(Response res, String gameName) {
+        HashMap<String, String> responseValues = new HashMap<>();
+        responseValues.put("gameName", gameName);
         APIResponse apiResponse = new APIResponse(200, responseValues);
         res.status(apiResponse.statusCode);
         res.body(apiResponse.statusMessage);

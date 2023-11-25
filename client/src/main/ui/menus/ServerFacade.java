@@ -1,5 +1,6 @@
 package ui.menus;
 
+import Models.AuthToken;
 import Responses.APIResponse;
 import Responses.ResponseMapper;
 import com.google.gson.Gson;
@@ -55,6 +56,13 @@ public class ServerFacade {
         return this.makeRequest("GET", path, null, authToken);
     }
 
+    public APIResponse joinGame(String authToken, int gameID, String playerColor) {
+        var path = "/game";
+        HashMap<String, String> body = new HashMap<>();
+        body.put("gameID", Integer.toString(gameID));
+        body.put("playerColor", playerColor);
+        return this.makeRequest("PUT", path, body, authToken);
+    }
     private APIResponse makeRequest(String method, String path, Object body, String authToken) {
         try {
 
@@ -111,5 +119,6 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
+
 
 }

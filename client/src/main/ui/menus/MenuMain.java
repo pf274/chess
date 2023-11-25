@@ -43,8 +43,8 @@ public class MenuMain extends MenuBase {
             case "jg":
             case "3":
                 return new MenuJoinGame(scanner, authToken);
-            case "join observer":
-            case "jo":
+            case "observe game":
+            case "og":
             case "4":
                 return new MenuJoinObserver(scanner, authToken);
             case "help":
@@ -77,7 +77,7 @@ public class MenuMain extends MenuBase {
                 "Create Game",
                 "List Games",
                 "Join Game",
-                "Join Observer",
+                "Observe Game",
                 "Help",
                 "Logout",
         }, scanner);

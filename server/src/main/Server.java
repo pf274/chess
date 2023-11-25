@@ -138,8 +138,10 @@ public class Server {
 
         // handle uncaught exceptions
         Spark.exception(Exception.class, (exception, request, response) -> {
+            System.out.println("Exception: " + exception.getMessage());
           response.status(500);
           response.body(exception.getMessage());
+          System.out.println("----------");
         });
     }
 }
