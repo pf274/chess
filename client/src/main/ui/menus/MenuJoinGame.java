@@ -19,8 +19,10 @@ public class MenuJoinGame extends MenuBase {
 
     private String playerColor = null;
 
+    private boolean success = false;
+
     public MenuJoinGame(Scanner scanner, AuthToken authToken) {
-        super("Join Game", "Please enter a game number.", null, scanner);
+        super("Join Game", "", null, scanner);
         this.authToken = authToken;
     }
 
@@ -30,7 +32,10 @@ public class MenuJoinGame extends MenuBase {
         if (exited) {
             return new MenuMain(scanner, authToken);
         }
-        return new MenuInGame(gameID, gameName, playerColor, scanner, authToken);
+        if (success) {
+            return new MenuInGame(gameID, gameName, playerColor, scanner, authToken);
+        }
+        return this;
     }
 
     @Override
@@ -40,7 +45,12 @@ public class MenuJoinGame extends MenuBase {
             System.out.println(subtitle);
             this.initialized = true;
         }
+        System.out.println("Please enter a game number. (\"exit\" to go back)");
         String input = getUserInput(scanner);
+        if (input.equals("exit")) {
+            exited = true;
+            return;
+        }
         while (!isNumber(input)) {
             System.out.println("Invalid input");
             System.out.println("Please enter a game number. (\"exit\" to go back)");
@@ -71,9 +81,12 @@ public class MenuJoinGame extends MenuBase {
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("gameName")) {
                 gameName = (String) responseMap.get("gameName");
+                success = true;
             } else {
                 System.out.println("Error: " + response.statusMessage);
             }
+        } else if (response.statusCode == 403) {
+            System.out.println("Error: player color already taken");
         } else {
             System.out.println("Error: " + response.statusMessage);
         }
