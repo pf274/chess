@@ -12,9 +12,7 @@ public class MenuCreateGame extends MenuBase {
 
     private boolean success = false;
 
-    private String gameID;
-
-    private String username;
+    private int gameID;
 
     private String playerColor;
 
@@ -34,7 +32,7 @@ public class MenuCreateGame extends MenuBase {
             return new MenuMain(scanner, authToken);
         }
         if (success) {
-            return new MenuInGame(gameID, username, playerColor, scanner);
+            return new MenuInGame(gameID, gameName, "white", scanner, authToken);
         } else {
             return new MenuMain(scanner, authToken);
         }
@@ -54,7 +52,13 @@ public class MenuCreateGame extends MenuBase {
             ServerFacade serverFacade = ServerFacade.getInstance();
             APIResponse response = serverFacade.createGame(gameName, authToken.authToken);
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
-            System.out.println(response.statusMessage);
+            if (responseMap.containsKey("gameID")) {
+//                System.out.println("New Game ID: " + responseMap.get("gameID"));
+                gameID = (int) Math.floor((Double) responseMap.get("gameID"));
+                success = true;
+            } else {
+                System.out.println("Error creating game: " + responseMap.get("message"));
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

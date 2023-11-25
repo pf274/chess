@@ -82,6 +82,11 @@ public class Server {
             response.header("Access-Control-Allow-Origin", "*");
             String requestPath = request.pathInfo();
             String requestMethod = request.requestMethod();
+            System.out.println("----------");
+            System.out.println("Request:");
+            System.out.println(requestMethod + " " + requestPath);
+            System.out.println(request.body());
+            System.out.println("\nLog:");
             if (Objects.equals(requestMethod, "OPTIONS")) {
                 return;
             }
@@ -126,6 +131,9 @@ public class Server {
         // set response type
         Spark.after((request, response) -> {
             response.type("application/json");
+            System.out.println("\nResponse:");
+            System.out.println(response.status() + " " + response.body());
+            System.out.println("----------");
         });
 
         // handle uncaught exceptions

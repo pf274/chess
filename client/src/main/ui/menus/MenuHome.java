@@ -34,19 +34,23 @@ public class MenuHome extends MenuBase {
         switch (input) {
             case "login":
             case "l":
+            case "1":
                 return new MenuLogin(scanner);
             case "register":
             case "r":
+            case "2":
                 return new MenuRegister(scanner);
             case "help":
             case "h":
+            case "3":
                 System.out.println("Options:");
-                for (String option : options) {
-                    System.out.println("\t" + option);
+                for (int i = 0; i < options.length; i++) {
+                    System.out.println(i + 1 + "\t" + options[i]);
                 }
                 return this;
             case "exit":
             case "e":
+            case "4":
                 return null;
             default:
                 System.out.println("Invalid input");

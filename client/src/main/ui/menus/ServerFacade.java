@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class ServerFacade {
     private static ServerFacade instance;  // Singleton instance
-    private final String serverUrl = "http://localhost:8080/";
+    private final String serverUrl = "http://localhost:8080";
 
     // Public method to access the singleton instance
     public static ServerFacade getInstance() {
@@ -47,6 +47,12 @@ public class ServerFacade {
         HashMap<String, String> body = new HashMap<>();
         body.put("gameName", gameName);
         return this.makeRequest("POST", path, body, authToken);
+    }
+
+
+    public APIResponse listGames(String authToken) {
+        var path = "/game";
+        return this.makeRequest("GET", path, null, authToken);
     }
 
     private APIResponse makeRequest(String method, String path, Object body, String authToken) {
@@ -105,4 +111,5 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
+
 }

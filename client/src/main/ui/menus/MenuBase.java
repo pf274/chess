@@ -20,8 +20,8 @@ public abstract class MenuBase {
     public void display() {
         System.out.println(title);
         System.out.println(subtitle);
-        for (String option : options) {
-            System.out.println("\t" + option);
+        for (int i = 0; i < options.length; i++) {
+            System.out.println(i + 1 + "\t" + options[i]);
         }
     }
 
@@ -33,6 +33,12 @@ public abstract class MenuBase {
     }
 
     public boolean isValidOption(String option) {
+        if (isNumber(option)) {
+            int optionNum = Integer.parseInt(option);
+            if (optionNum > 0 && optionNum <= options.length) {
+                return true;
+            }
+        }
         for (String opt : options) {
             // get abbreviated versions
             String[] optParts = opt.split(" ");
@@ -47,5 +53,14 @@ public abstract class MenuBase {
             }
         }
         return false;
+    }
+
+    public boolean isNumber(String option) {
+        try {
+            Integer.parseInt(option);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
