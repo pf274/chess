@@ -34,7 +34,10 @@ public class JoinGameHandler extends HandlerBase {
             if (gameID == null) {
                 throw new ServiceException(403, "bad request");
             }
-            String playerColor = (String) body.get("playerColor");
+            String playerColor = null;
+            if (body.containsKey("playerColor")) {
+                playerColor = (String) body.get("playerColor");
+            }
             int gameIDAsInt = Integer.parseInt(gameID);
             if (this.service.gameDAO.getGameByID(gameIDAsInt) == null) {
                 ResponseMapper.exceptionResponse(400, "game does not exist.", res);

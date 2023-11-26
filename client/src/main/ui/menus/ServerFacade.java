@@ -60,7 +60,9 @@ public class ServerFacade {
         var path = "/game";
         HashMap<String, String> body = new HashMap<>();
         body.put("gameID", Integer.toString(gameID));
-        body.put("playerColor", playerColor);
+        if (playerColor != null) {
+            body.put("playerColor", playerColor);
+        }
         return this.makeRequest("PUT", path, body, authToken);
     }
     private APIResponse makeRequest(String method, String path, Object body, String authToken) {

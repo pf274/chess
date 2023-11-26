@@ -30,11 +30,11 @@ public class JoinGameService extends ServiceBase {
             if (foundGame == null) {
                 throw new ServiceException(400, "bad request");
             }
-            if (foundGame.blackUsername != null && Objects.equals(playerColor.toUpperCase(), "BLACK")) {
-                throw new ServiceException(403, "already taken");
+            if (foundGame.blackUsername != null && playerColor != null && Objects.equals(playerColor.toUpperCase(), "BLACK")) {
+                throw new ServiceException(403, "black already taken");
             }
-            if (foundGame.whiteUsername != null && Objects.equals(playerColor.toUpperCase(), "WHITE")) {
-                throw new ServiceException(403, "already taken");
+            if (foundGame.whiteUsername != null && playerColor != null && Objects.equals(playerColor.toUpperCase(), "WHITE")) {
+                throw new ServiceException(403, "white already taken");
             }
             gameDAO.addUserToGame(gameID, username, playerColor);
             return foundGame.gameName;

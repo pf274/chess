@@ -20,7 +20,7 @@ public class MenuInGame extends MenuBase {
     public MenuInGame(int gameID, String gameName, String playerColor, Scanner scanner, AuthToken authToken) {
         super(
                 "Playing \"" + gameName + "\" Game ID: " + gameID,
-                playerColor != null ? "Your team: " + playerColor : "Observing",
+                playerColor != null ? "Playing as: " + playerColor : "Observing",
                 new String[] {
 //                    "Move",
 //                    "Flip Board",
