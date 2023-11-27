@@ -45,7 +45,10 @@ public class Database {
     synchronized public Connection getConnection() throws DataAccessException {
         try {
             Connection connection;
-            Dotenv dotenv = Dotenv.configure().directory("./").load();
+            Dotenv dotenv = getDotenv();
+            if (dotenv == null || dotenv.entries().isEmpty()) {
+                throw new DataAccessException(500, "Could not find .env file");
+            }
             String DB_USERNAME = dotenv.get("SQL_USERNAME");
             String DB_PASSWORD = dotenv.get("SQL_PASSWORD");
             if (connections.isEmpty()) {
@@ -57,6 +60,18 @@ public class Database {
             return connection;
         } catch (Exception e) {
             throw new DataAccessException(500, e.getMessage());
+        }
+    }
+
+    private Dotenv getDotenv() {
+        try {
+            return Dotenv.configure().directory("./").load();
+        } catch (Exception e) {
+            try {
+                return Dotenv.configure().directory("../").load();
+            } catch (Exception e2) {
+                return null;
+            }
         }
     }
 
