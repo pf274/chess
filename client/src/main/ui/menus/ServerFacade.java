@@ -11,7 +11,6 @@ import java.util.HashMap;
 
 public class ServerFacade {
     private static ServerFacade instance;  // Singleton instance
-    private final String serverUrl = "http://localhost:8080";
 
     // Public method to access the singleton instance
     public static ServerFacade getInstance() {
@@ -50,6 +49,10 @@ public class ServerFacade {
         return this.makeRequest("POST", path, body, authToken);
     }
 
+    public APIResponse clearDatabase() {
+        var path = "/db";
+        return this.makeRequest("DELETE", path, null, null);
+    }
 
     public APIResponse listGames(String authToken) {
         var path = "/game";
@@ -68,6 +71,7 @@ public class ServerFacade {
     private APIResponse makeRequest(String method, String path, Object body, String authToken) {
         try {
 
+            String serverUrl = "http://localhost:8080";
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
