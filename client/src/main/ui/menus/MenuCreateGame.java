@@ -10,16 +10,6 @@ import java.util.Scanner;
 public class MenuCreateGame extends MenuBase {
     private final AuthToken authToken;
 
-    private boolean success = false;
-
-    private int gameID;
-
-    private String playerColor;
-
-    private String gameName;
-
-    private boolean exited = false;
-
     public MenuCreateGame(Scanner scanner, AuthToken authToken) {
         super("Create Game", "Create a new Game!", null, scanner);
         this.authToken = authToken;
@@ -28,23 +18,16 @@ public class MenuCreateGame extends MenuBase {
     @Override
     public MenuBase run() {
         display();
-        if (exited) {
-            return new MenuMain(scanner, authToken);
-        }
-        if (success) {
-            return new MenuInGame(gameID, gameName, "white", scanner, authToken);
-        } else {
-            return new MenuMain(scanner, authToken);
-        }
+        return new MenuMain(scanner, authToken);
     }
 
     @Override
     public void display() {
         System.out.println("Creating new game...");
         System.out.print("Game Name: (type exit to go back) ");
-        this.gameName = getUserInput(scanner);
+        String gameName = getUserInput(scanner);
         if (gameName.equals("exit") || gameName.equals("e")) {
-            this.exited = true;
+            return;
         }
         HashMap<String, String> body = new HashMap<>();
         body.put("gameName", gameName);
@@ -53,9 +36,9 @@ public class MenuCreateGame extends MenuBase {
             APIResponse response = serverFacade.createGame(gameName, authToken.authToken);
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("gameID")) {
-//                System.out.println("New Game ID: " + responseMap.get("gameID"));
-                gameID = (int) Math.floor((Double) responseMap.get("gameID"));
-                success = true;
+                int gameID = (int) Math.floor((Double) responseMap.get("gameID"));
+                System.out.println("New Game \"" + gameName + "\" created successfully!");
+                System.out.println("New Game ID: " + gameID);
             } else {
                 System.out.println("Error creating game: " + responseMap.get("message"));
             }

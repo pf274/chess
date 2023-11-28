@@ -110,6 +110,9 @@ public class MenuMain extends MenuBase {
                 HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
                 if (responseMap.containsKey("games")) {
                     ArrayList games = (ArrayList) responseMap.get("games");
+                    if (games.isEmpty()) {
+                        System.out.println("\tNo games available");
+                    }
                     for (var game : games) {
                         LinkedTreeMap gameMap = (LinkedTreeMap) game;
                         int gameId = ((Double) gameMap.get("gameID")).intValue();

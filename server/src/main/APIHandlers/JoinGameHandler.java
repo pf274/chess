@@ -38,7 +38,7 @@ public class JoinGameHandler extends HandlerBase {
             if (body.containsKey("playerColor")) {
                 playerColor = (String) body.get("playerColor");
             }
-            int gameIDAsInt = gameID instanceof Double ? (int) Math.floor((Double) gameID) : (int) gameID;
+            int gameIDAsInt = gameID instanceof Double ? (int) Math.floor((Double) gameID) : Integer.parseInt((String) gameID);
             if (this.service.gameDAO.getGameByID(gameIDAsInt) == null) {
                 ResponseMapper.exceptionResponse(400, "game does not exist.", res);
                 return null;
