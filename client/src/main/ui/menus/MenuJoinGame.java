@@ -3,17 +3,16 @@ package ui.menus;
 import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
+import ui.facades.ServerFacade;
+import ui.facades.WebSocketFacade;
 
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class MenuJoinGame extends MenuBase {
-    private final AuthToken authToken;
     private boolean initialized = false;
 
     private boolean exited = false;
-
-    private int gameID = 0;
 
     private String gameName = null;
 
@@ -33,7 +32,9 @@ public class MenuJoinGame extends MenuBase {
             return new MenuMain(scanner, authToken);
         }
         if (success) {
-            return new MenuInGame(gameID, gameName, playerColor, scanner, authToken);
+            MenuBase newMenu = new MenuInGame(gameID, gameName, playerColor, scanner, authToken);
+            newMenu.webSocketFacade = new WebSocketFacade(newMenu);
+            return newMenu;
         }
         return this;
     }
@@ -75,7 +76,7 @@ public class MenuJoinGame extends MenuBase {
         }
         playerColor = input;
         System.out.println("Joining game " + gameID + "...");
-        ServerFacade serverFacade = new ServerFacade();
+        ServerFacade serverFacade = ServerFacade.getInstance();
         APIResponse response = serverFacade.joinGame(authToken.authToken, gameID, playerColor);
         if (response.statusCode == 200) {
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);

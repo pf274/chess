@@ -2,12 +2,12 @@ package ui.menus;
 
 import Models.AuthToken;
 import com.google.gson.Gson;
+import ui.facades.ServerFacade;
 
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class MenuJoinObserver extends MenuBase {
-    private final AuthToken authToken;
 
     private boolean initialized = false;
 
@@ -15,7 +15,6 @@ public class MenuJoinObserver extends MenuBase {
 
     private boolean success = false;
 
-    private int gameID = 0;
 
     private String gameName = null;
 

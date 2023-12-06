@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ui.menus.ServerFacade;
+import ui.facades.ServerFacade;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ServerFacadeTests {

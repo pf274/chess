@@ -1,6 +1,5 @@
-package ui.menus;
+package ui.facades;
 
-import Models.AuthToken;
 import Responses.APIResponse;
 import Responses.ResponseMapper;
 import com.google.gson.Gson;

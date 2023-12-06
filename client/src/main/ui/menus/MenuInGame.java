@@ -7,14 +7,9 @@ import ui.BoardDisplay;
 import java.util.Scanner;
 
 public class MenuInGame extends MenuBase {
-
-    private final int gameID;
     private boolean initialized = false;
-    private final AuthToken authToken;
     private boolean exited = false;
-
     private ChessBoardImpl chessBoard = null;
-
     private String orientation = "white";
     private String turn = "white";
     public MenuInGame(int gameID, String gameName, String playerColor, Scanner scanner, AuthToken authToken) {
@@ -29,6 +24,7 @@ public class MenuInGame extends MenuBase {
                     "Exit"
                 },
                 scanner);
+        this.orientation = playerColor;
         this.authToken = authToken;
         this.gameID = gameID;
     }

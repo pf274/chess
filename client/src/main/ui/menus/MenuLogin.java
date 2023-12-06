@@ -3,6 +3,7 @@ package ui.menus;
 import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
+import ui.facades.ServerFacade;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,6 @@ import java.util.Scanner;
 public class MenuLogin extends MenuBase {
     private String username;
     private String password;
-    private AuthToken authToken;
     private boolean exited = false;
     private boolean loggedIn = false;
     public MenuLogin(Scanner scanner) {

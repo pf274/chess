@@ -1,5 +1,8 @@
 package ui.menus;
 
+import Models.AuthToken;
+import ui.facades.WebSocketFacade;
+
 import java.util.Scanner;
 
 public abstract class MenuBase {
@@ -10,6 +13,12 @@ public abstract class MenuBase {
     String[] options;
 
     Scanner scanner;
+
+    public AuthToken authToken;
+
+    public WebSocketFacade webSocketFacade;
+
+    public int gameID;
 
     public MenuBase(String title, String subtitle, String[] options, Scanner scanner) {
         this.title = title;
@@ -62,5 +71,9 @@ public abstract class MenuBase {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public void handleWSMessage(String message) {
+        System.out.println("I got the message!" + message);
     }
 }

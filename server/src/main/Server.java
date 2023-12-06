@@ -3,6 +3,7 @@ import DAO.AuthDAO;
 import DAO.GameDAO;
 import DAO.UserDAO;
 import Responses.ResponseMapper;
+import WebSocket.WebSocketHandler;
 import spark.Route;
 import spark.Spark;
 import java.util.Objects;
@@ -63,6 +64,8 @@ public class Server {
     public static void main(String[] args) {
         var serverInstance = new Server();
         Spark.port(8080);
+        WebSocketHandler webSocketHandler = WebSocketHandler.getInstance();
+        Spark.webSocket("/connect", webSocketHandler);
 
         // enable CORS
         Spark.options("/*", (req, res) -> {

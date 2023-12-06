@@ -1,17 +1,16 @@
 package ui.menus;
 
 import Models.AuthToken;
-import Models.Game;
 import Responses.APIResponse;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import ui.facades.ServerFacade;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class MenuMain extends MenuBase {
-    private final AuthToken authToken;
     private boolean initialized = false;
 
     @Override
