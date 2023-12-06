@@ -20,9 +20,9 @@ public class WebSocketFacade extends Endpoint {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
             this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-                  System.out.println(message);
-                  this.parentMenu.handleWSMessage(message);
-             });
+                System.out.println(message);
+                this.parentMenu.handleWSMessage(message);
+            });
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

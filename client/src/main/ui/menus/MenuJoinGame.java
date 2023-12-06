@@ -2,6 +2,7 @@ package ui.menus;
 
 import Models.AuthToken;
 import Responses.APIResponse;
+import WebSocket.ChessAction;
 import com.google.gson.Gson;
 import ui.facades.ServerFacade;
 import ui.facades.WebSocketFacade;
@@ -34,6 +35,7 @@ public class MenuJoinGame extends MenuBase {
         if (success) {
             MenuBase newMenu = new MenuInGame(gameID, gameName, playerColor, scanner, authToken);
             newMenu.webSocketFacade = new WebSocketFacade(newMenu);
+            newMenu.webSocketFacade.sendMessage(gameID, authToken.username, ChessAction.CONNECT, playerColor);
             return newMenu;
         }
         return this;

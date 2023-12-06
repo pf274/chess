@@ -41,6 +41,7 @@ public class MenuInGame extends MenuBase {
         if (!exited) {
             return this;
         } else {
+            webSocketFacade.leaveGame();
             return new MenuMain(scanner, authToken);
         }
 
