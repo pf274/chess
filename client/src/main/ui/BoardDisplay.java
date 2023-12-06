@@ -16,7 +16,7 @@ public class BoardDisplay {
     private static final String secondBackgroundColor = SET_BG_COLOR_BLACK;
     public static void displayBoard(ChessBoardImpl board, boolean reversed) {
         // top border
-        printHorizontalBorder();
+        printHorizontalBorder(reversed);
         // board rows
         for (int row = reversed ? 8 : 1; reversed ? row >= 1 : row <= 8; row += reversed ? -1 : 1) {
             // left border
@@ -85,12 +85,12 @@ public class BoardDisplay {
             System.out.print("\n");
         }
         // bottom border
-        printHorizontalBorder();
+        printHorizontalBorder(reversed);
     }
 
-    private static void printHorizontalBorder() {
+    private static void printHorizontalBorder(boolean reversed) {
         System.out.print(borderBackgroundColor + borderTextColor + EMPTY);
-        for (char column = 'a'; column <= 'h'; column++) {
+        for (char column = reversed ? 'h' : 'a'; reversed ? (column >= 'a') : column <= 'h'; column += reversed ? -1 : 1) {
             System.out.print(WIDE_SPACE);
             System.out.print(column + " ");
         }
