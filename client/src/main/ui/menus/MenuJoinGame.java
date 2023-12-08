@@ -35,7 +35,7 @@ public class MenuJoinGame extends MenuBase {
         if (success) {
             MenuInGame newMenu = new MenuInGame(gameID, gameName, playerColor, scanner, authToken);
             newMenu.webSocketFacade = new WebSocketFacade(newMenu);
-            newMenu.webSocketFacade.sendMessage(gameID, authToken.username, UserGameCommand.CommandType.JOIN_PLAYER, playerColor);
+            newMenu.webSocketFacade.joinGameAsPlayer();
             return newMenu;
         }
         return this;

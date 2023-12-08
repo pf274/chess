@@ -33,9 +33,6 @@ public class MenuInGame extends MenuBase {
 
     @Override
     public MenuBase run() {
-        chessBoard = new ChessBoardImpl();
-        chessBoard.resetBoard();
-        BoardDisplay.displayBoard(chessBoard, Objects.equals(orientation, "black"));
         display();
         if (!exited) {
             return this;
@@ -102,7 +99,7 @@ public class MenuInGame extends MenuBase {
 
     private String getValidPosition() {
         String position = getUserInput(scanner);
-        char row = position.length() >= 1 ? position.charAt(0): 'z';
+        char row = !position.isEmpty() ? position.charAt(0): 'z';
         char col = position.length() >= 2 ? position.charAt(1): '0';
         while (position.length() < 2 || row < 'a' || row > 'h' || col < '1' || col > '8') {
             System.out.println("Invalid position. Try again.");

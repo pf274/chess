@@ -18,7 +18,7 @@ public class BoardDisplay {
         // top border
         printHorizontalBorder(reversed);
         // board rows
-        for (int row = reversed ? 8 : 1; reversed ? row >= 1 : row <= 8; row += reversed ? -1 : 1) {
+        for (int row = reversed ? 1 : 8; reversed ? row <= 8 : row >= 1; row += reversed ? 1 : -1) {
             // left border
             System.out.print(borderBackgroundColor + borderTextColor + WIDE_SPACE + row + " " + defaultBackground + defaultTextColor);
             // board columns

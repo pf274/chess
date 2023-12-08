@@ -18,6 +18,7 @@ import userCommands.UserGameCommand;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 @WebSocket
 public class WebSocketHandler {
@@ -27,33 +28,57 @@ public class WebSocketHandler {
     private final ConnectionManager connectionManager = new ConnectionManager();
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) throws IOException {
+    public void onMessage(Session session, String message) {
         HashMap data = new Gson().fromJson(message, HashMap.class);
         String username = (String) data.get("username");
         String action = (String) data.get("action");
         String details = (String) data.get("details");
         int gameID = ((Double) data.get("gameID")).intValue();
-        switch (UserGameCommand.CommandType.valueOf(action.toUpperCase())) {
-            case JOIN_PLAYER:
-            case JOIN_OBSERVER:
-                connect(username, gameID, session);
-                break;
-            case LEAVE:
-            case RESIGN:
-                disconnect(username, gameID);
-                break;
+        try {
+            switch (UserGameCommand.CommandType.valueOf(action.toUpperCase())) {
+                case JOIN_PLAYER:
+                case JOIN_OBSERVER:
+                    connect(username, gameID, details, session);
+                    break;
+                case LEAVE:
+                case RESIGN:
+                    disconnect(username, gameID);
+                    break;
 //            case CHAT:
 //                chatMessage(username, gameID, details);
 //                break;
-            case MAKE_MOVE:
-                attemptMove(username, gameID, details);
+                case MAKE_MOVE:
+                    attemptMove(username, gameID, details);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
+
     }
 
-    public void connect(String username, int gameID, Session session) throws IOException {
-        connectionManager.addConnection(gameID, session, username);
-        String body = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.NOTIFICATION, username + " has connected to the game.");
-        connectionManager.broadcastMessageToOthers(username, gameID, body);
+    public void connect(String username, int gameID, String details, Session session) {
+        try {
+            connectionManager.addConnection(gameID, session, username);
+            Game game = gameDataService.getGame(gameID);
+            String message = username + " has connected to the game";
+            if (!Objects.equals(details, "")) {
+                message = message + " as " + details + ".";
+            } else {
+                message = message + " as an observer.";
+            }
+            String notificationBody = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.NOTIFICATION, message);
+            String loadBody = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.LOAD_GAME, game.game.getGameAsString());
+            connectionManager.broadcastMessageToOthers(username, gameID, notificationBody);
+            connectionManager.sendMessage(username, gameID, loadBody);
+            System.out.println("Finished connecting");
+        } catch (ServiceException | IOException e) {
+            String body = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.ERROR, "Error: invalid game");
+            try {
+                connectionManager.sendMessage(username, gameID, body);
+            } catch (IOException e2) {
+                System.out.println(e2.getMessage());
+            }
+        }
     }
 
     public void disconnect(String username, int gameID) throws IOException {

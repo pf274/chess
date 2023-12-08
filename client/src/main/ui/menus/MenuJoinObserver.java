@@ -34,7 +34,7 @@ public class MenuJoinObserver extends MenuBase {
         if (success) {
             MenuInGame newMenu = new MenuInGame(gameID, gameName, null, scanner, authToken);
             newMenu.webSocketFacade = new WebSocketFacade(newMenu);
-            newMenu.webSocketFacade.sendMessage(gameID, authToken.username, UserGameCommand.CommandType.JOIN_OBSERVER, "");
+            newMenu.webSocketFacade.joinGameAsObserver();
             return newMenu;
         }
         return new MenuMain(scanner, authToken);

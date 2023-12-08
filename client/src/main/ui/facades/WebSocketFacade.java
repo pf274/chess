@@ -50,6 +50,24 @@ public class WebSocketFacade extends Endpoint {
             System.out.println(e.getMessage());
         }
     }
+
+    public void joinGameAsPlayer() {
+        try {
+            sendMessage(parentMenu.gameID, parentMenu.authToken.username, UserGameCommand.CommandType.JOIN_PLAYER, parentMenu.orientation);
+            this.session.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void joinGameAsObserver() {
+        try {
+            sendMessage(parentMenu.gameID, parentMenu.authToken.username, UserGameCommand.CommandType.JOIN_PLAYER, "");
+            this.session.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
     public void leaveGame() {
         try {
             sendMessage(parentMenu.gameID, parentMenu.authToken.username, UserGameCommand.CommandType.LEAVE, "");
