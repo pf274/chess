@@ -53,6 +53,33 @@ public class JoinGameHandler extends HandlerBase {
         return null;
     };
 
+    public Route leaveGame = (req, res) -> {
+        try {
+            // get authorization
+            AuthToken authToken = getAuthToken(req, service.authDAO);
+            assert authToken != null;
+            String username = authToken.username;
+            // get body variables
+            var body = parseBodyToMap(req.body());
+            var gameID = body.get("gameID");
+            if (gameID == null) {
+                throw new ServiceException(403, "bad request");
+            }
+            int gameIDAsInt = gameID instanceof Double ? (int) Math.floor((Double) gameID) : Integer.parseInt((String) gameID);
+            if (this.service.gameDAO.getGameByID(gameIDAsInt) == null) {
+                ResponseMapper.exceptionResponse(400, "game does not exist.", res);
+                return null;
+            }
+            // run service
+            this.service.leaveGame(gameIDAsInt, username);
+            // return successful response
+            ResponseMapper.leaveGameResponse(res, gameIDAsInt);
+        } catch (ServiceException e) {
+            ResponseMapper.exceptionResponse(e.statusCode, e.statusMessage, res);
+        }
+        return null;
+    };
+
     /**
      * Creates a new JoinGameHandler and defines its routes.
      * @param authDAO an instance of AuthDAO created in the Server class

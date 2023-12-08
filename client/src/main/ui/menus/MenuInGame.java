@@ -3,24 +3,26 @@ package ui.menus;
 import Models.AuthToken;
 import chess.ChessBoardImpl;
 import ui.BoardDisplay;
+import ui.facades.ServerFacade;
 
+import java.util.Objects;
 import java.util.Scanner;
 
 public class MenuInGame extends MenuBase {
     private boolean initialized = false;
     private boolean exited = false;
-    private ChessBoardImpl chessBoard = null;
-    private String orientation = "white";
+    public String orientation;
     private String turn = "white";
+    public ChessBoardImpl chessBoard = null;
     public MenuInGame(int gameID, String gameName, String playerColor, Scanner scanner, AuthToken authToken) {
         super(
                 "Playing \"" + gameName + "\" Game ID: " + gameID,
                 playerColor != null ? "Playing as: " + playerColor : "Observing",
                 new String[] {
-//                    "Move",
-//                    "Flip Board",
-//                    "Help",
-//                    "Resign",
+                    "Move",
+                    "Flip Board",
+                    "Help",
+                    "Resign",
                     "Exit"
                 },
                 scanner);
@@ -33,14 +35,13 @@ public class MenuInGame extends MenuBase {
     public MenuBase run() {
         chessBoard = new ChessBoardImpl();
         chessBoard.resetBoard();
-        System.out.println("White's View: ");
-        BoardDisplay.displayBoard(chessBoard, false);
-        System.out.println("\nBlack's View: ");
-        BoardDisplay.displayBoard(chessBoard, true);
+        BoardDisplay.displayBoard(chessBoard, Objects.equals(orientation, "black"));
         display();
         if (!exited) {
             return this;
         } else {
+            ServerFacade serverFacade = ServerFacade.getInstance();
+            serverFacade.leaveGame(authToken.authToken, gameID);
             webSocketFacade.leaveGame();
             return new MenuMain(scanner, authToken);
         }
@@ -68,8 +69,11 @@ public class MenuInGame extends MenuBase {
         switch (choice) {
             case "move":
             case "m":
-                // TODO: MOVE
-                System.out.println("Moving...");
+                System.out.println("Specify your starting position: (e.g. \"e7\")");
+                String startingPosition = getValidPosition();
+                System.out.println("Specify your ending position: (e.g. \"f8\")");
+                String endingPosition = getValidPosition();
+                webSocketFacade.makeMove(startingPosition.substring(0, 2) + " " + endingPosition.substring(0, 2));
                 break;
             case "flip board":
             case "fb":
@@ -94,5 +98,21 @@ public class MenuInGame extends MenuBase {
                 this.exited = true;
                 break;
         }
+    }
+
+    private String getValidPosition() {
+        String position = getUserInput(scanner);
+        char row = position.length() >= 1 ? position.charAt(0): 'z';
+        char col = position.length() >= 2 ? position.charAt(1): '0';
+        while (position.length() < 2 || row < 'a' || row > 'h' || col < '1' || col > '8') {
+            System.out.println("Invalid position. Try again.");
+            position = getUserInput(scanner);
+            row = position.charAt(0);
+            col = position.charAt(1);
+            if (position.equals("exit")) {
+                return "exit";
+            }
+        }
+        return position;
     }
 }

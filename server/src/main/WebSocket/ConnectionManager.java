@@ -30,11 +30,30 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastMessage(String username, int gameID, String message) throws IOException {
+    public void broadcastMessage(int gameID, String message) throws IOException {
+        if (gameConnections.containsKey(gameID)) {
+            for (Connection connection : gameConnections.get(gameID)) {
+                connection.getSession().getRemote().sendString(message);
+            }
+        }
+    }
+
+    public void broadcastMessageToOthers(String username, int gameID, String message) throws IOException {
         if (gameConnections.containsKey(gameID)) {
             for (Connection connection : gameConnections.get(gameID)) {
                 if (!connection.getUsername().equals(username)) {
                     connection.getSession().getRemote().sendString(message);
+                }
+            }
+        }
+    }
+
+    public void sendMessage(String username, int gameID, String message) throws IOException {
+        if (gameConnections.containsKey(gameID)) {
+            for (Connection connection: gameConnections.get(gameID)) {
+                if (connection.getUsername().equals(username)) {
+                    connection.getSession().getRemote().sendString(message);
+                    return;
                 }
             }
         }

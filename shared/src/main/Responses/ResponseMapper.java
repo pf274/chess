@@ -140,4 +140,12 @@ public class ResponseMapper {
         res.status(apiResponse.statusCode);
         res.body(apiResponse.statusMessage);
     }
+
+    public static void leaveGameResponse(Response res, int gameID) {
+        HashMap<String, String> responseValues = new HashMap<>();
+        responseValues.put("message", "Successfully left game " + gameID);
+        APIResponse apiResponse = new APIResponse(200, responseValues);
+        res.status(apiResponse.statusCode);
+        res.body(apiResponse.statusMessage);
+    }
 }

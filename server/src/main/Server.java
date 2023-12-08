@@ -3,7 +3,9 @@ import DAO.AuthDAO;
 import DAO.GameDAO;
 import DAO.UserDAO;
 import Responses.ResponseMapper;
+import Services.GameDataService;
 import WebSocket.WebSocketHandler;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import spark.Route;
 import spark.Spark;
 import java.util.Objects;
@@ -57,6 +59,7 @@ public class Server {
      */
     private final GameDataHandler gameDataHandler = new GameDataHandler(authDAO, userDAO, gameDAO);
 
+    private final GameDataService webSocketGameDataService = new GameDataService(authDAO, userDAO, gameDAO);
     /**
      * The server
      * @param args the command line arguments
@@ -64,7 +67,7 @@ public class Server {
     public static void main(String[] args) {
         var serverInstance = new Server();
         Spark.port(8080);
-        WebSocketHandler webSocketHandler = WebSocketHandler.getInstance();
+        WebSocketHandler webSocketHandler = new WebSocketHandler(serverInstance.webSocketGameDataService);
         Spark.webSocket("/connect", webSocketHandler);
 
         // enable CORS
@@ -100,6 +103,9 @@ public class Server {
             if ((Objects.equals(requestPath, "/db") && Objects.equals(requestMethod, "DELETE"))) {
                 return;
             }
+            if (Objects.equals(requestPath, "/connect") && Objects.equals(requestMethod, "GET")) {
+                return;
+            }
             String authToken = request.headers("Authorization");
             // get rid of "Bearer " prefix (for Postman debugging)
             if (authToken != null && authToken.startsWith("Bearer ")) {
@@ -110,7 +116,6 @@ public class Server {
                 Spark.halt(res.statusCode, res.statusMessage);
             }
         });
-
         // gameDataHandler routes
         Spark.delete("/db", serverInstance.gameDataHandler.clearDatabase);
         Spark.get("/game", serverInstance.gameDataHandler.getGameList);
@@ -122,14 +127,15 @@ public class Server {
         Spark.post("/user", serverInstance.registerHandler.register);
         // joinGameHandler routes
         Spark.put("/game", serverInstance.joinGameHandler.joinGame);
+        Spark.delete("/game", serverInstance.joinGameHandler.leaveGame);
 
         // default routes
-        Spark.path("*", () -> {
-            Spark.get("", defaultRouteHandler);
-            Spark.post("", defaultRouteHandler);
-            Spark.delete("", defaultRouteHandler);
-            Spark.put("", defaultRouteHandler);
-        });
+//        Spark.path("*", () -> {
+//            Spark.get("", defaultRouteHandler);
+//            Spark.post("", defaultRouteHandler);
+//            Spark.delete("", defaultRouteHandler);
+//            Spark.put("", defaultRouteHandler);
+//        });
 
         // set response type
         Spark.after((request, response) -> {

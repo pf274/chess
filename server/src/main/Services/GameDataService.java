@@ -62,4 +62,12 @@ public class GameDataService extends ServiceBase {
             throw new ServiceException(e.statusCode, e.statusMessage);
         }
     }
+
+    public Game getGame(int gameID) throws ServiceException {
+        try {
+            return gameDAO.getGameByID(gameID);
+        } catch (DataAccessException e) {
+            throw new ServiceException(e.statusCode, e.statusMessage);
+        }
+    }
 }

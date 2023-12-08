@@ -1,10 +1,10 @@
 package ui.menus;
 
 import Models.AuthToken;
-import WebSocket.ChessAction;
 import com.google.gson.Gson;
 import ui.facades.ServerFacade;
 import ui.facades.WebSocketFacade;
+import userCommands.UserGameCommand;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -32,9 +32,9 @@ public class MenuJoinObserver extends MenuBase {
             return new MenuMain(scanner, authToken);
         }
         if (success) {
-            MenuBase newMenu = new MenuInGame(gameID, gameName, null, scanner, authToken);
+            MenuInGame newMenu = new MenuInGame(gameID, gameName, null, scanner, authToken);
             newMenu.webSocketFacade = new WebSocketFacade(newMenu);
-            newMenu.webSocketFacade.sendMessage(gameID, authToken.username, ChessAction.CONNECT, "");
+            newMenu.webSocketFacade.sendMessage(gameID, authToken.username, UserGameCommand.CommandType.JOIN_OBSERVER, "");
             return newMenu;
         }
         return new MenuMain(scanner, authToken);

@@ -42,4 +42,13 @@ public class JoinGameService extends ServiceBase {
             throw new ServiceException(500, e.getMessage());
         }
     }
+
+    public boolean leaveGame(int gameID, String username) throws ServiceException {
+        try {
+            gameDAO.removeUserFromGame(gameID, username);
+            return true;
+        } catch (DataAccessException e) {
+            throw new ServiceException(500, e.getMessage());
+        }
+    }
 }

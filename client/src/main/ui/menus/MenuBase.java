@@ -18,6 +18,8 @@ public abstract class MenuBase {
 
     public WebSocketFacade webSocketFacade;
 
+
+
     public int gameID;
 
     public MenuBase(String title, String subtitle, String[] options, Scanner scanner) {
@@ -71,9 +73,5 @@ public abstract class MenuBase {
         } catch (NumberFormatException e) {
             return false;
         }
-    }
-
-    public void handleWSMessage(String message) {
-        System.out.println("I got the message!" + message);
     }
 }

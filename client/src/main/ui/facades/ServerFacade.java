@@ -67,6 +67,13 @@ public class ServerFacade {
         }
         return this.makeRequest("PUT", path, body, authToken);
     }
+
+    public APIResponse leaveGame(String authToken, int gameID) {
+        var path = "/game";
+        HashMap<String, String> body = new HashMap<>();
+        body.put("gameID", Integer.toString(gameID));
+        return this.makeRequest("DELETE", path, body, authToken);
+    }
     private APIResponse makeRequest(String method, String path, Object body, String authToken) {
         try {
 
@@ -124,6 +131,7 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
+
 
 
 }
