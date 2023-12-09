@@ -69,8 +69,9 @@ public class MenuRegister extends MenuBase {
             if (responseMap.containsKey("message")) {
                 System.out.println(responseMap.get("message"));
             } else {
-                MenuBase.authToken = new AuthToken(username);
-                MenuBase.authToken.authToken = responseMap.get("authToken").toString();
+                AuthToken newAuthToken = new AuthToken(username);
+                newAuthToken.authToken = responseMap.get("authToken").toString();
+                MenuBase.setAuthToken(newAuthToken);
                 loggedIn = true;
                 System.out.println("Logged in!");
             }

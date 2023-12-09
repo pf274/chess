@@ -43,6 +43,7 @@ public class MenuInGame extends MenuBase {
         if (!initialized) {
             System.out.println("In Game\n");
             initialized = true;
+            scanner.nextLine();
         }
         System.out.println(turn + "'s turn!");
         String choice = "";

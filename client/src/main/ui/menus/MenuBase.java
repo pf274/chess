@@ -16,6 +16,8 @@ public abstract class MenuBase {
 
     private static MenuBase instance;
 
+    public static String orientation = "white";
+
     public static MenuBase getInstance() {
         return instance;
     }

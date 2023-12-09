@@ -439,10 +439,10 @@ public class ChessGameImpl implements ChessGame {
             var turnString = matcher.group(2);
             var castlingString = matcher.group(3);
             var enPassantString = matcher.group(4);
-            System.out.println("Board: " + boardString);
-            System.out.println("Current Turn: " + turnString);
-            System.out.println("Castling Rights: " + castlingString);
-            System.out.println("En Passant Target: " + enPassantString);
+//            System.out.println("Board: " + boardString);
+//            System.out.println("Current Turn: " + turnString);
+//            System.out.println("Castling Rights: " + castlingString);
+//            System.out.println("En Passant Target: " + enPassantString);
             // set the board
             var loadedBoard = new ChessBoardImpl();
             var boardIndex = 0;
@@ -484,7 +484,7 @@ public class ChessGameImpl implements ChessGame {
                 loadedBoard.enPassantMove = new ChessPositionImpl(rowNumber, columnNumber);
             }
             setBoard(loadedBoard);
-            System.out.println("Board loaded");
+//            System.out.println("Board loaded");
         }
     }
 }

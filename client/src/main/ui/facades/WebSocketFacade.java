@@ -6,11 +6,15 @@ import chess.ChessGameImpl;
 import com.google.gson.Gson;
 import serverMessages.ServerMessage;
 import ui.BoardDisplay;
+import ui.EscapeSequences;
+import ui.menus.MenuBase;
 import ui.menus.MenuInGame;
 import userCommands.UserGameCommand;
 
 import javax.websocket.*;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -21,26 +25,35 @@ public class WebSocketFacade extends Endpoint {
         if (instance == null) {
             instance = new WebSocketFacade();
         }
+        if (!instance.session.isOpen()) {
+            instance.session = instance.getNewSession();
+        }
         return instance;
     }
 
     private Session session;
 
     public WebSocketFacade() {
+        session = getNewSession();
+    }
+
+    private Session getNewSession(){
         try {
             String serverUrl = "ws://localhost:8080";
             URI socketURI = new URI(serverUrl + "/connect");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            this.session = container.connectToServer(this, socketURI);
-            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-               @Override
-               public void onMessage(String message) {
-                   System.out.println(message);
-                   WebSocketFacade.this.handleWSMessage(message);
-               }
+            Session newSession = container.connectToServer(this, socketURI);
+            newSession.addMessageHandler(new MessageHandler.Whole<String>() { // DON'T change this to a lambda function. IntelliJ is wrong.
+                @Override
+                public void onMessage(String message) {
+                    handleWSMessage(message);
+                }
             });
+            return newSession;
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println(e.getMessage());
+            System.out.println("Failed to initialize websocket");
+            return null;
         }
     }
     @Override
@@ -59,7 +72,6 @@ public class WebSocketFacade extends Endpoint {
     public void joinGameAsPlayer(int gameID, String username, String teamColor) {
         try {
             sendMessage(gameID, username, UserGameCommand.CommandType.JOIN_PLAYER, teamColor);
-            this.session.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -68,7 +80,6 @@ public class WebSocketFacade extends Endpoint {
     public void joinGameAsObserver(int gameID, String username) {
         try {
             sendMessage(gameID, username, UserGameCommand.CommandType.JOIN_PLAYER, "");
-            this.session.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -77,6 +88,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             sendMessage(gameID, username, UserGameCommand.CommandType.LEAVE, "");
             this.session.close();
+            WebSocketFacade.instance = null;
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -104,7 +116,8 @@ public class WebSocketFacade extends Endpoint {
                     ChessGameImpl newGame = new ChessGameImpl();
                     newGame.loadGameFromString(details);
                     ChessBoardImpl chessBoard = (ChessBoardImpl) newGame.getBoard();
-                    BoardDisplay.displayBoard(chessBoard, Objects.equals(orientation, "black"));
+                    BoardDisplay.displayBoard(chessBoard, Objects.equals(MenuBase.orientation, "black"));
+                    MenuBase.getInstance().run();
                     break;
             }
         }

@@ -31,13 +31,13 @@ public class MenuLogin extends MenuBase {
 
     public void display() {
         System.out.println("Login\n");
-        System.out.print("Username: (type exit to go back) ");
+        System.out.println("Username: (type exit to go back) ");
         this.username = getUserInput(scanner);
         if (username.equals("exit") || username.equals("e")) {
             this.exited = true;
             return;
         }
-        System.out.print("Password: (type exit to go back) ");
+        System.out.println("Password: (type exit to go back) ");
         this.password = getUserInput(scanner);
         if (password.equals("exit") || password.equals("e")) {
             this.exited = true;
@@ -60,10 +60,10 @@ public class MenuLogin extends MenuBase {
             } else if (responseMap.containsKey("error")) {
                 System.out.println(responseMap.get("error"));
             } else {
-                MenuBase.authToken = new AuthToken(username);
-                MenuBase.authToken.authToken = responseMap.get("authToken").toString();
+                AuthToken newAuthToken = new AuthToken(username);
+                newAuthToken.authToken = responseMap.get("authToken").toString();
+                MenuBase.setAuthToken(newAuthToken);
                 loggedIn = true;
-                System.out.println("Logged in!");
             }
         } catch (Exception e) {
             System.out.println("Invalid login credentials.");

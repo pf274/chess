@@ -38,20 +38,23 @@ public class MenuHome extends MenuBase {
             case "l":
             case "1":
                 MenuBase.setInstance(new MenuLogin(scanner));
+                break;
             case "register":
             case "r":
             case "2":
                 MenuBase.setInstance(new MenuRegister(scanner));
+                break;
             case "help":
             case "h":
             case "3":
                 System.out.println("Options:");
                 printOptions(options);
-                return;
+                break;
             case "exit":
             case "e":
             case "4":
                 MenuBase.setInstance(null); // end the program
+                break;
             default:
                 System.out.println("Invalid input");
         }

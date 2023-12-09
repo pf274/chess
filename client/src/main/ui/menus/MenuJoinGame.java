@@ -37,6 +37,7 @@ public class MenuJoinGame extends MenuBase {
         if (exited) {
             MenuBase.setInstance(new MenuMain(scanner));
         } else if (success) {
+            MenuBase.orientation = playerColor;
             WebSocketFacade.getInstance().joinGameAsPlayer(gameID, authToken.username, playerColor);
             MenuBase.setInstance(new MenuInGame(gameID, playerColor, scanner));
         }
@@ -103,7 +104,9 @@ public class MenuJoinGame extends MenuBase {
         HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
         ArrayList<LinkedTreeMap> games = (ArrayList<LinkedTreeMap>) responseMap.get("games");
         for (LinkedTreeMap game : games) {
-            String gameID = (String) game.get("gameID");
+            Double gameIDDouble = (Double) game.get("gameID");
+            int gameIDint = gameIDDouble.intValue();
+            String gameID = Integer.toString(gameIDint);
             String gameName = (String) game.get("gameName");
             this.games.put(gameName.toLowerCase(), gameID);
             this.games.put(gameID, gameID);

@@ -30,6 +30,7 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
+        System.out.println("Websocket message: " + message);
         HashMap data = new Gson().fromJson(message, HashMap.class);
         String username = (String) data.get("username");
         String action = (String) data.get("action");
@@ -57,8 +58,8 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketError
-    public void onError(Session session, String message) {
-        System.out.println(message);
+    public void onError(Session session, Throwable error) {
+        System.out.println("Websocket error: " + error);
     }
 
     public void connect(String username, int gameID, String details, Session session) {

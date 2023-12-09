@@ -8,7 +8,6 @@ import java.util.HashMap;
 
 public class ConnectionManager {
 
-    ArrayList<Connection> gamelessConnections = new ArrayList<>();
     HashMap<Integer, ArrayList<Connection>> gameConnections = new HashMap<>();
     public void addConnection(int gameID, Session session, String username) {
         Connection newConnection = new Connection(session, username, gameID);
@@ -33,6 +32,7 @@ public class ConnectionManager {
     }
 
     public void broadcastMessage(int gameID, String message) throws IOException {
+        System.out.println("Broadcasting message to all participants of game " + gameID + ": " + message);
         if (gameConnections.containsKey(gameID)) {
             for (Connection connection : gameConnections.get(gameID)) {
                 connection.getSession().getRemote().sendString(message);
@@ -41,6 +41,7 @@ public class ConnectionManager {
     }
 
     public void broadcastMessageToOthers(String username, int gameID, String message) throws IOException {
+        System.out.println("Broadcasting message to all participants of game " + gameID + " except " + username + ": " + message);
         if (gameConnections.containsKey(gameID)) {
             for (Connection connection : gameConnections.get(gameID)) {
                 if (!connection.getUsername().equals(username)) {
@@ -51,6 +52,7 @@ public class ConnectionManager {
     }
 
     public void sendMessage(String username, int gameID, String message) throws IOException {
+        System.out.println("Broadcasting message to " + username + ": " + message);
         if (gameConnections.containsKey(gameID)) {
             for (Connection connection: gameConnections.get(gameID)) {
                 if (connection.getUsername().equals(username)) {
