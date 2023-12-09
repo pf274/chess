@@ -27,7 +27,7 @@ public class MenuObservingGame extends MenuBase {
         display();
         if (exited) {
             ServerFacade.getInstance().leaveGame(authToken.authToken, gameID);
-            WebSocketFacade.getInstance().leaveGame(gameID, authToken.username);
+            WebSocketFacade.getInstance().leaveGame(gameID);
             MenuBase.setInstance(new MenuMain(scanner));
         }
     }
@@ -65,7 +65,7 @@ public class MenuObservingGame extends MenuBase {
             case "leave":
             case "l":
             case "3":
-                WebSocketFacade.getInstance().leaveGame(gameID, authToken.username);
+                WebSocketFacade.getInstance().leaveGame(gameID);
                 this.exited = true;
                 break;
         }

@@ -37,7 +37,7 @@ public class MenuJoinObserver extends MenuBase {
             MenuBase.setInstance(new MenuMain(scanner));
         }
         if (success) {
-            WebSocketFacade.getInstance().joinGameAsObserver(gameID, authToken.username);
+            WebSocketFacade.getInstance().joinGameAsObserver(gameID);
             MenuBase.setInstance(new MenuInGame(gameID, null, scanner));
         }
         MenuBase.setInstance(new MenuMain(scanner));

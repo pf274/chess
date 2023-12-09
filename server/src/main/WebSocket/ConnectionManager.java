@@ -1,6 +1,8 @@
 package WebSocket;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import serverMessages.ServerMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,35 +33,46 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastMessage(int gameID, String message) throws IOException {
-        System.out.println("Broadcasting message to all participants of game " + gameID + ": " + message);
+    public void broadcastMessage(int gameID, ServerMessage message) throws IOException {
+        String messageString = new Gson().toJson(message);
+        System.out.println("Broadcasting message to all participants of game " + gameID + ": " + messageString);
         if (gameConnections.containsKey(gameID)) {
             for (Connection connection : gameConnections.get(gameID)) {
-                connection.getSession().getRemote().sendString(message);
+                connection.getSession().getRemote().sendString(messageString);
             }
         }
     }
 
-    public void broadcastMessageToOthers(String username, int gameID, String message) throws IOException {
-        System.out.println("Broadcasting message to all participants of game " + gameID + " except " + username + ": " + message);
-        if (gameConnections.containsKey(gameID)) {
-            for (Connection connection : gameConnections.get(gameID)) {
-                if (!connection.getUsername().equals(username)) {
-                    connection.getSession().getRemote().sendString(message);
+    public void broadcastMessageToOthers(String username, int gameID, ServerMessage message) {
+        try {
+            String messageString = new Gson().toJson(message);
+            System.out.println("Broadcasting message to all participants of game " + gameID + " except " + username + ": " + messageString);
+            if (gameConnections.containsKey(gameID)) {
+                for (Connection connection : gameConnections.get(gameID)) {
+                    if (!connection.getUsername().equals(username)) {
+                        connection.getSession().getRemote().sendString(messageString);
+                    }
                 }
             }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
-    public void sendMessage(String username, int gameID, String message) throws IOException {
-        System.out.println("Broadcasting message to " + username + ": " + message);
-        if (gameConnections.containsKey(gameID)) {
-            for (Connection connection: gameConnections.get(gameID)) {
-                if (connection.getUsername().equals(username)) {
-                    connection.getSession().getRemote().sendString(message);
-                    return;
+    public void sendMessage(String username, int gameID, ServerMessage message) {
+        try {
+            String messageString = new Gson().toJson(message);
+            System.out.println("Broadcasting message to " + username + ": " + message);
+            if (gameConnections.containsKey(gameID)) {
+                for (Connection connection: gameConnections.get(gameID)) {
+                    if (connection.getUsername().equals(username)) {
+                        connection.getSession().getRemote().sendString(messageString);
+                        return;
+                    }
                 }
             }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

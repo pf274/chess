@@ -4,6 +4,7 @@ import DAO.GameDAO;
 import DAO.UserDAO;
 import Responses.ResponseMapper;
 import Services.GameDataService;
+import Services.LoginService;
 import WebSocket.WebSocketHandler;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import spark.Route;
@@ -60,6 +61,8 @@ public class Server {
     private final GameDataHandler gameDataHandler = new GameDataHandler(authDAO, userDAO, gameDAO);
 
     private final GameDataService webSocketGameDataService = new GameDataService(authDAO, userDAO, gameDAO);
+
+    private final LoginService webSocketLoginService = new LoginService(authDAO, userDAO, gameDAO);
     /**
      * The server
      * @param args the command line arguments
@@ -67,7 +70,7 @@ public class Server {
     public static void main(String[] args) {
         var serverInstance = new Server();
         Spark.port(8080);
-        WebSocketHandler webSocketHandler = new WebSocketHandler(serverInstance.webSocketGameDataService);
+        WebSocketHandler webSocketHandler = new WebSocketHandler(serverInstance.webSocketGameDataService, serverInstance.webSocketLoginService);
         Spark.webSocket("/connect", webSocketHandler);
 
         // enable CORS

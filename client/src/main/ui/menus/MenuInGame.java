@@ -1,9 +1,6 @@
 package ui.menus;
 
-import chess.ChessBoardImpl;
-import chess.ChessMove;
-import chess.ChessPieceImpl;
-import chess.ChessPositionImpl;
+import chess.*;
 import ui.BoardDisplay;
 import ui.facades.ServerFacade;
 import ui.facades.WebSocketFacade;
@@ -36,7 +33,7 @@ public class MenuInGame extends MenuBase {
         display();
         if (exited) {
             ServerFacade.getInstance().leaveGame(authToken.authToken, gameID);
-            WebSocketFacade.getInstance().leaveGame(gameID, authToken.username);
+            WebSocketFacade.getInstance().leaveGame(gameID);
             MenuBase.setInstance(new MenuMain(scanner));
         }
     }
@@ -81,7 +78,7 @@ public class MenuInGame extends MenuBase {
             case "leave":
             case "l":
             case "6":
-                WebSocketFacade.getInstance().leaveGame(gameID, authToken.username);
+                WebSocketFacade.getInstance().leaveGame(gameID);
                 this.exited = true;
                 break;
         }
@@ -110,16 +107,43 @@ public class MenuInGame extends MenuBase {
                 return;
             }
             System.out.println("Specify your starting position: (e.g. \"e7\")");
-            String startingPosition = getValidPosition();
-            if (startingPosition.equals("exit")) {
+            String start = getValidPosition();
+            if (start.equals("exit")) {
                 return;
             }
             System.out.println("Specify your ending position: (e.g. \"f8\")");
-            String endingPosition = getValidPosition();
-            if (endingPosition.equals("exit")) {
+            String end = getValidPosition();
+            if (end.equals("exit")) {
                 return;
             }
-            WebSocketFacade.getInstance().makeMove(startingPosition.substring(0, 2) + " " + endingPosition.substring(0, 2), gameID, authToken.username);
+            ChessPiece.PieceType promotionPiece = null;
+            ChessPositionImpl startingPosition = new ChessPositionImpl(start.charAt(1) - '1' + 1, start.charAt(0) - 'a' + 1);
+            ChessPositionImpl endingPosition = new ChessPositionImpl(end.charAt(1) - '1' + 1, end.charAt(0) - 'a' + 1);
+            ChessPiece movingPiece = MenuBase.chessGame.getBoard().getPiece(startingPosition);
+            if (movingPiece == null) {
+                System.out.println("There is no piece at that position.");
+                return;
+            }
+            if (!movingPiece.getTeamColor().toString().toLowerCase().equals(MenuBase.playerColor)) {
+                System.out.println("That piece is not yours.");
+                return;
+            }
+            if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN && (endingPosition.getRow() == 1 || endingPosition.getRow() == 8)) {
+                System.out.println("Promote your pawn to a queen, knight, bishop, or rook? (q/n/b/r)");
+                String input = getUserInput(scanner);
+                while (!input.equals("q") && !input.equals("n") && !input.equals("b") && !input.equals("r")) {
+                    System.out.println("Invalid input. Try again.");
+                    input = getUserInput(scanner);
+                }
+                promotionPiece = switch (input) {
+                    case "q" -> ChessPiece.PieceType.QUEEN;
+                    case "n" -> ChessPiece.PieceType.KNIGHT;
+                    case "b" -> ChessPiece.PieceType.BISHOP;
+                    default -> ChessPiece.PieceType.ROOK;
+                };
+            }
+            ChessMove move = new ChessMoveImpl(startingPosition, endingPosition, promotionPiece);
+            WebSocketFacade.getInstance().makeMove(move, gameID);
             waitUntilSocketResponds();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -135,7 +159,7 @@ public class MenuInGame extends MenuBase {
                 input = getUserInput(scanner);
             }
             if (input.equals("y")) {
-                WebSocketFacade.getInstance().resign(gameID, authToken.username);
+                WebSocketFacade.getInstance().resign(gameID);
                 waitUntilSocketResponds();
             }
         } catch (Exception e) {

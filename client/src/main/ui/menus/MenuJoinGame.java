@@ -38,7 +38,7 @@ public class MenuJoinGame extends MenuBase {
             MenuBase.setInstance(new MenuMain(scanner));
         } else if (success) {
             MenuBase.orientation = playerColor;
-            WebSocketFacade.getInstance().joinGameAsPlayer(gameID, authToken.username, playerColor);
+            WebSocketFacade.getInstance().joinGameAsPlayer(gameID, playerColor);
             MenuBase.setInstance(new MenuInGame(gameID, playerColor, scanner));
         }
     }

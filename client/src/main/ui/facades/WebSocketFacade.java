@@ -1,23 +1,17 @@
 package ui.facades;
 
-import WebSocket.MessageFormatter;
-import chess.ChessBoardImpl;
-import chess.ChessGame;
-import chess.ChessGameImpl;
+import chess.*;
 import com.google.gson.Gson;
 import serverMessages.ServerMessage;
+import serverMessages.ServerMessageError;
+import serverMessages.ServerMessageLoadGame;
+import serverMessages.ServerMessageNotification;
 import ui.BoardDisplay;
-import ui.EscapeSequences;
 import ui.menus.MenuBase;
-import ui.menus.MenuInGame;
-import userCommands.UserGameCommand;
+import userCommands.*;
 
 import javax.websocket.*;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Objects;
 
 public class WebSocketFacade extends Endpoint {
 
@@ -61,33 +55,36 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void sendMessage(int gameID, String username, UserGameCommand.CommandType action, String details) {
+    public void sendMessage(UserGameCommand command) {
         try {
-            String body = MessageFormatter.prepareBodyClient(username, gameID, action, details);
-            this.session.getBasicRemote().sendText(body);
+            String message = new Gson().toJson(command);
+            this.session.getBasicRemote().sendText(message);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void joinGameAsPlayer(int gameID, String username, String teamColor) {
+    public void joinGameAsPlayer(int gameID, String teamColor) {
         try {
-            sendMessage(gameID, username, UserGameCommand.CommandType.JOIN_PLAYER, teamColor);
+            UserGameCommandJoinPlayer joinPlayerCommand = new UserGameCommandJoinPlayer(MenuBase.authToken.authToken, gameID, ChessGame.TeamColor.valueOf(teamColor.toUpperCase()));
+            sendMessage(joinPlayerCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void joinGameAsObserver(int gameID, String username) {
+    public void joinGameAsObserver(int gameID) {
         try {
-            sendMessage(gameID, username, UserGameCommand.CommandType.JOIN_PLAYER, "");
+            UserGameCommandJoinObserver joinObserverCommand = new UserGameCommandJoinObserver(MenuBase.authToken.authToken, gameID);
+            sendMessage(joinObserverCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-    public void leaveGame(int gameID, String username) {
+    public void leaveGame(int gameID) {
         try {
-            sendMessage(gameID, username, UserGameCommand.CommandType.LEAVE, "");
+            UserGameCommandLeave leaveCommand = new UserGameCommandLeave(MenuBase.authToken.authToken, gameID);
+            sendMessage(leaveCommand);
             this.session.close();
             WebSocketFacade.instance = null;
         } catch (Exception e) {
@@ -95,56 +92,55 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void makeMove(String move, int gameID, String username) {
+    public void makeMove(ChessMove move, int gameID) {
         try {
-            sendMessage(gameID, username, UserGameCommand.CommandType.MAKE_MOVE, move);
+            UserGameCommandMakeMove makeMoveCommand = new UserGameCommandMakeMove(MenuBase.authToken.authToken, gameID, move);
+            sendMessage(makeMoveCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void resign(int gameID, String username) {
+    public void resign(int gameID) {
         try {
-            sendMessage(gameID, username, UserGameCommand.CommandType.RESIGN, "");
+            UserGameCommandResign resignCommand = new UserGameCommandResign(MenuBase.authToken.authToken, gameID);
+            sendMessage(resignCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
     public void handleWSMessage(String message) {
-        HashMap parsedBody = new Gson().fromJson(message, HashMap.class);
-        if (parsedBody.containsKey("action")) {
-            String action = (String) parsedBody.get("action");
-            String details = (String) parsedBody.get("details");
-            switch (ServerMessage.ServerMessageType.valueOf(action)) {
-                case ERROR:
-                case NOTIFICATION:
-                    if (details.contains("resigned")) {
-                        MenuBase.chessGame.gameOver = true;
-                    }
-                    System.out.println(details);
-                    System.out.print(">>> ");
-                    break;
-                case LOAD_GAME:
-                    ChessGameImpl loadedGame = new ChessGameImpl();
-                    loadedGame.loadGameFromString(details);
-                    MenuBase.chessGame = loadedGame;
-                    BoardDisplay.displayBoard();
-                    if (MenuBase.chessGame.isInCheckmate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                        System.out.println("Checkmate!");
-                    } else if (MenuBase.chessGame.isInCheck(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                        System.out.println("Check!");
-                    } else if (MenuBase.chessGame.isInStalemate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                        System.out.println("Stalemate!");
-                    }
-                    if (MenuBase.getInstance().isMyTurn()) {
-                        System.out.println("Your turn!");
-                    } else {
-                        System.out.println("Opponent's turn.");
-                    }
-                    System.out.print(">>> ");
-                    break;
-            }
+        ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+        switch (serverMessage.getServerMessageType()) {
+            case ERROR:
+                ServerMessageError error = new Gson().fromJson(message, ServerMessageError.class);
+                System.out.println(error.errorMessage);
+                System.out.print(">>> ");
+                break;
+            case NOTIFICATION:
+                ServerMessageNotification notification = new Gson().fromJson(message, ServerMessageNotification.class);
+                System.out.println(notification.message);
+                System.out.print(">>> ");
+                break;
+            case LOAD_GAME:
+                ServerMessageLoadGame loadGame = new Gson().fromJson(message, ServerMessageLoadGame.class);
+                MenuBase.chessGame = (ChessGameImpl) loadGame.game;
+                BoardDisplay.displayBoard();
+                if (MenuBase.chessGame.isInCheckmate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                    System.out.println("Checkmate!");
+                } else if (MenuBase.chessGame.isInCheck(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                    System.out.println("Check!");
+                } else if (MenuBase.chessGame.isInStalemate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                    System.out.println("Stalemate!");
+                }
+                if (MenuBase.getInstance().isMyTurn()) {
+                    System.out.println("Your turn!");
+                } else {
+                    System.out.println("Opponent's turn.");
+                }
+                System.out.print(">>> ");
+                break;
         }
         MenuBase.socketResponded = true;
     }
