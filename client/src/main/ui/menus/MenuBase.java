@@ -18,6 +18,8 @@ public abstract class MenuBase {
 
     public static String orientation = "white";
 
+    public static boolean socketResponded = false;
+
     public static MenuBase getInstance() {
         return instance;
     }
@@ -79,6 +81,17 @@ public abstract class MenuBase {
             return true;
         } catch (NumberFormatException e) {
             return false;
+        }
+    }
+
+    public synchronized void waitUntilSocketResponds() {
+        socketResponded = false;
+        while (!socketResponded) {
+            try {
+                wait(250);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

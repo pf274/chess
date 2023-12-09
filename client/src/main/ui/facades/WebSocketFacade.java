@@ -117,9 +117,9 @@ public class WebSocketFacade extends Endpoint {
                     newGame.loadGameFromString(details);
                     ChessBoardImpl chessBoard = (ChessBoardImpl) newGame.getBoard();
                     BoardDisplay.displayBoard(chessBoard, Objects.equals(MenuBase.orientation, "black"));
-                    MenuBase.getInstance().run();
                     break;
             }
         }
+        MenuBase.socketResponded = true;
     }
 }
