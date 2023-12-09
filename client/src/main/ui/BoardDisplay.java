@@ -18,6 +18,10 @@ public class BoardDisplay {
     private static final String firstBackgroundColor = SET_BG_COLOR_LIGHT_GREY;
     private static final String secondBackgroundColor = SET_BG_COLOR_BLACK;
 
+    private static final String whitePieceColor = SET_TEXT_COLOR_RED;
+
+    private static final String blackPieceColor = SET_TEXT_COLOR_BLUE;
+
     private static final String highlightedFirstBackgroundColor = SET_BG_COLOR_GREEN;
 
     private static final String highlightedSecondBackgroundColor = SET_BG_COLOR_DARK_GREEN;
@@ -49,44 +53,44 @@ public class BoardDisplay {
                     pieceString = switch (pieceType) {
                         case PAWN -> {
                             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                                yield WHITE_PAWN;
+                                yield whitePieceColor + WHITE_PAWN + defaultTextColor;
                             } else {
-                                yield BLACK_PAWN;
+                                yield blackPieceColor + WHITE_PAWN + defaultTextColor;
                             }
                         }
                         case ROOK -> {
                             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                                yield WHITE_ROOK;
+                                yield whitePieceColor + WHITE_ROOK + defaultTextColor;
                             } else {
-                                yield BLACK_ROOK;
+                                yield blackPieceColor + WHITE_ROOK + defaultTextColor;
                             }
                         }
                         case KNIGHT -> {
                             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                                yield WHITE_KNIGHT;
+                                yield whitePieceColor + WHITE_KNIGHT + defaultTextColor;
                             } else {
-                                yield BLACK_KNIGHT;
+                                yield blackPieceColor + WHITE_KNIGHT + defaultTextColor;
                             }
                         }
                         case BISHOP -> {
                             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                                yield WHITE_BISHOP;
+                                yield whitePieceColor + WHITE_BISHOP + defaultTextColor;
                             } else {
-                                yield BLACK_BISHOP;
+                                yield blackPieceColor + WHITE_BISHOP + defaultTextColor;
                             }
                         }
                         case QUEEN -> {
                             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                                yield WHITE_QUEEN;
+                                yield whitePieceColor + WHITE_QUEEN + defaultTextColor;
                             } else {
-                                yield BLACK_QUEEN;
+                                yield blackPieceColor + WHITE_QUEEN + defaultTextColor;
                             }
                         }
                         case KING -> {
                             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                                yield WHITE_KING;
+                                yield whitePieceColor + WHITE_KING + defaultTextColor;
                             } else {
-                                yield BLACK_KING;
+                                yield blackPieceColor + WHITE_KING + defaultTextColor;
                             }
                         }
                     };

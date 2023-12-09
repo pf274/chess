@@ -2,6 +2,7 @@ package ui.facades;
 
 import WebSocket.MessageFormatter;
 import chess.ChessBoardImpl;
+import chess.ChessGame;
 import chess.ChessGameImpl;
 import com.google.gson.Gson;
 import serverMessages.ServerMessage;
@@ -122,19 +123,26 @@ public class WebSocketFacade extends Endpoint {
                         MenuBase.chessGame.gameOver = true;
                     }
                     System.out.println(details);
-                    System.out.println(">>> ");
+                    System.out.print(">>> ");
                     break;
                 case LOAD_GAME:
                     ChessGameImpl loadedGame = new ChessGameImpl();
                     loadedGame.loadGameFromString(details);
                     MenuBase.chessGame = loadedGame;
                     BoardDisplay.displayBoard();
+                    if (MenuBase.chessGame.isInCheckmate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                        System.out.println("Checkmate!");
+                    } else if (MenuBase.chessGame.isInCheck(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                        System.out.println("Check!");
+                    } else if (MenuBase.chessGame.isInStalemate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                        System.out.println("Stalemate!");
+                    }
                     if (MenuBase.getInstance().isMyTurn()) {
                         System.out.println("Your turn!");
                     } else {
                         System.out.println("Opponent's turn.");
                     }
-                    System.out.println(">>> ");
+                    System.out.print(">>> ");
                     break;
             }
         }

@@ -75,6 +75,7 @@ public abstract class MenuBase {
     }
 
     public void printOptions(String[] options) {
+        System.out.print("\n");
         for (int i = 0; i < options.length; i++) {
             System.out.println(i + 1 + "\t" + options[i]);
         }
