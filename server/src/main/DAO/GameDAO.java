@@ -256,4 +256,22 @@ public class GameDAO implements DAO {
             throw new DataAccessException(500, e.getMessage());
         }
     }
+
+    public void saveGame(Game game) throws DataAccessException {
+        var connection = database.getConnection();
+        try {
+            var command = "UPDATE gameinfo SET whiteUser = ?, blackUser = ?, moveNumber = ?, gameState = ? WHERE gameID = ?";
+            var preparedStatement = connection.prepareStatement(command);
+            preparedStatement.setString(1, game.whiteUsername);
+            preparedStatement.setString(2, game.blackUsername);
+            preparedStatement.setInt(3, game.moveNumber);
+            preparedStatement.setString(4, game.game.getGameAsString());
+            preparedStatement.setInt(5, game.gameID);
+            preparedStatement.execute();
+            database.returnConnection(connection);
+        } catch (SQLException e) {
+            database.returnConnection(connection);
+            throw new DataAccessException(500, e.getMessage());
+        }
+    }
 }

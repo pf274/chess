@@ -99,6 +99,7 @@ public class WebSocketHandler {
             ChessPositionImpl endingPosition = new ChessPositionImpl(move.charAt(4) - '1' + 1, move.charAt(3) - 'a' + 1);
             ChessMoveImpl chessMove = new ChessMoveImpl(startingPosition, endingPosition, null);
             game.game.makeMove(chessMove);
+            gameDataService.saveGame(game);
             String body = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.LOAD_GAME, game.game.getGameAsString());
             connectionManager.broadcastMessage(gameID, body);
 

@@ -47,7 +47,6 @@ public class MenuInGame extends MenuBase {
             waitUntilGameLoads();
             initialized = true;
         }
-        System.out.println(isMyTurn() ? "Your turn!" : "Opponent's turn.");
         String choice = "";
         while (!isValidOption(choice, options)) {
             printOptions(options);

@@ -70,4 +70,12 @@ public class GameDataService extends ServiceBase {
             throw new ServiceException(e.statusCode, e.statusMessage);
         }
     }
+
+    public void saveGame(Game game) throws ServiceException {
+        try {
+            gameDAO.saveGame(game);
+        } catch (DataAccessException e) {
+            throw new ServiceException(e.statusCode, e.statusMessage);
+        }
+    }
 }

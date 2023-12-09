@@ -31,8 +31,13 @@ public abstract class MenuBase {
     public static void setInstance(MenuBase newInstance) {
         instance = newInstance;
     }
+
     public MenuBase(Scanner scanner) {
         this.scanner = scanner;
+        MenuBase.orientation = "white";
+        MenuBase.playerColor = "white";
+        MenuBase.socketResponded = false;
+        MenuBase.chessGame = null;
     }
 
     protected static void setAuthToken(AuthToken authToken) {
@@ -114,6 +119,7 @@ public abstract class MenuBase {
             }
         }
     }
+
     public boolean isMyTurn() {
         if (chessGame == null) {
             return false;
