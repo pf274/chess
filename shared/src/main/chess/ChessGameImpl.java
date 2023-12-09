@@ -10,6 +10,7 @@ import static chess.ChessPieceImpl.isSafeMove;
 
 public class ChessGameImpl implements ChessGame {
 
+    public boolean gameOver = false;
     ChessGame.TeamColor turn = ChessGame.TeamColor.WHITE;
     ChessBoardImpl boardInstance = new ChessBoardImpl();
 

@@ -1,6 +1,9 @@
 package ui;
 
 import chess.*;
+import ui.menus.MenuBase;
+
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 
@@ -12,9 +15,23 @@ public class BoardDisplay {
     private static final String defaultTextColor = "\u001b[39m";
     private static final String borderBackgroundColor = SET_BG_COLOR_DARK_GREY;
     private static final String borderTextColor = SET_TEXT_COLOR_WHITE;
-    private static final String firstBackgroundColor = SET_BG_COLOR_DARK_GREEN;
+    private static final String firstBackgroundColor = SET_BG_COLOR_LIGHT_GREY;
     private static final String secondBackgroundColor = SET_BG_COLOR_BLACK;
-    public static void displayBoard(ChessBoardImpl board, boolean reversed) {
+
+    private static final String highlightedFirstBackgroundColor = SET_BG_COLOR_GREEN;
+
+    private static final String highlightedSecondBackgroundColor = SET_BG_COLOR_DARK_GREEN;
+
+    private static Collection<ChessMove> validMoves = null;
+
+    public static void displayBoardHighlighted(Collection<ChessMove> validMoves) {
+        BoardDisplay.validMoves = validMoves;
+        displayBoard();
+        BoardDisplay.validMoves = null;
+    }
+    public static void displayBoard() {
+        System.out.print("\n");
+        boolean reversed = MenuBase.orientation.equals("black");
         // top border
         printHorizontalBorder(reversed);
         // board rows
@@ -23,7 +40,7 @@ public class BoardDisplay {
             System.out.print(borderBackgroundColor + borderTextColor + WIDE_SPACE + row + " " + defaultBackground + defaultTextColor);
             // board columns
             for (int column = reversed ? 8 : 1; reversed ? column >= 1 : column <= 8; column += reversed ? -1 : 1) {
-                ChessPieceImpl piece = (ChessPieceImpl) board.getPiece(new ChessPositionImpl(row, column));
+                ChessPieceImpl piece = (ChessPieceImpl) MenuBase.chessGame.getBoard().getPiece(new ChessPositionImpl(row, column));
                 String pieceString = "";
                 if (piece == null) {
                     pieceString = EMPTY;
@@ -74,10 +91,11 @@ public class BoardDisplay {
                         }
                     };
                 }
+                String backgroundColor = getBackgroundColor(row, column, validMoves);
                 if ((row * 8 + column + (row % 2)) % 2 == 0) {
-                    pieceString = firstBackgroundColor + pieceString + defaultBackground;
+                    pieceString = backgroundColor + pieceString + defaultBackground;
                 } else {
-                    pieceString = secondBackgroundColor + pieceString + defaultBackground;
+                    pieceString = backgroundColor + pieceString + defaultBackground;
                 }
                 System.out.print(pieceString);
             }
@@ -86,6 +104,23 @@ public class BoardDisplay {
         }
         // bottom border
         printHorizontalBorder(reversed);
+    }
+
+    private static String getBackgroundColor(int row, int column, Collection<ChessMove> validMoves) {
+        boolean isHighlighted = false;
+        if (validMoves != null) {
+            for (ChessMove move : validMoves) {
+                if (move.getEndPosition().getRow() == row && move.getEndPosition().getColumn() == column) {
+                    isHighlighted = true;
+                    break;
+                }
+            }
+        }
+        if ((row * 8 + column + (row % 2)) % 2 == 0) {
+            return isHighlighted ? highlightedFirstBackgroundColor : firstBackgroundColor;
+        } else {
+            return isHighlighted ? highlightedSecondBackgroundColor : secondBackgroundColor;
+        }
     }
 
     private static void printHorizontalBorder(boolean reversed) {

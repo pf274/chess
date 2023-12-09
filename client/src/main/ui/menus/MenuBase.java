@@ -1,9 +1,7 @@
 package ui.menus;
 
 import Models.AuthToken;
-import ui.facades.WebSocketFacade;
-
-import java.util.ArrayList;
+import chess.ChessGameImpl;
 import java.util.Scanner;
 
 public abstract class MenuBase {
@@ -12,13 +10,15 @@ public abstract class MenuBase {
 
     public static AuthToken authToken;
 
-    public WebSocketFacade webSocketFacade;
-
     private static MenuBase instance;
 
     public static String orientation = "white";
 
+    public static String playerColor = "white";
+
     public static boolean socketResponded = false;
+
+    public static ChessGameImpl chessGame;
 
     public static MenuBase getInstance() {
         return instance;
@@ -93,5 +93,32 @@ public abstract class MenuBase {
                 e.printStackTrace();
             }
         }
+    }
+
+    public synchronized void waitUntilGameLoads() {
+        while (chessGame == null) {
+            try {
+                wait(250);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public synchronized void waitUntilMyTurn() {
+        while (!isMyTurn()) {
+            try {
+                wait(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public boolean isMyTurn() {
+        if (chessGame == null) {
+            return false;
+        }
+        String currentTurn = chessGame.getTeamTurn().toString().toLowerCase();
+        return currentTurn.equals(MenuBase.playerColor);
     }
 }

@@ -33,6 +33,8 @@ public class Game {
     public ChessGameImpl game;
     public int moveNumber = 0;
 
+    public boolean gameOver = false;
+
     /**
      * Creates a new game
      * @param gameID the game's ID
@@ -43,6 +45,5 @@ public class Game {
         this.gameName = gameName;
         game = new ChessGameImpl();
         game.getBoard().resetBoard();
-//        System.out.println(game.getGameAsString());
     }
 }

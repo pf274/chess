@@ -43,12 +43,11 @@ public class WebSocketHandler {
                     connect(username, gameID, details, session);
                     break;
                 case LEAVE:
-                case RESIGN:
                     disconnect(username, gameID);
                     break;
-//            case CHAT:
-//                chatMessage(username, gameID, details);
-//                break;
+                case RESIGN:
+                    resign(username, gameID);
+                    break;
                 case MAKE_MOVE:
                     attemptMove(username, gameID, details);
             }
@@ -92,11 +91,6 @@ public class WebSocketHandler {
         connectionManager.broadcastMessageToOthers(username, gameID, body);
     }
 
-//    public void chatMessage(String username, int gameID, String message) throws IOException {
-//        String body = MessageFormatter.prepareBodyClient(username, gameID, ChessActionClient.CHAT, message);
-//        connectionManager.broadcastMessageToOthers(username, gameID, body);
-//    }
-
     public void attemptMove(String username, int gameID, String move) throws IOException {
         // get the board
         try {
@@ -112,6 +106,26 @@ public class WebSocketHandler {
             String body = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
             connectionManager.sendMessage(username, gameID, body);
         }
+    }
+
+    public void resign(String username, int gameID) throws IOException {
+        String resignBody = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.NOTIFICATION, username + " has resigned.");
+        String victoryMessage = "Game Over.";
+        try {
+            String resignedColor = Objects.equals(gameDataService.getGame(gameID).whiteUsername, username) ? "white" : "black";
+            String winnerUsername = Objects.equals(resignedColor, "white") ? gameDataService.getGame(gameID).blackUsername : gameDataService.getGame(gameID).whiteUsername;
+            victoryMessage = victoryMessage + " " + winnerUsername + " has won by resignation.";
+        } catch (ServiceException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            gameDataService.getGame(gameID).gameOver = true;
+        } catch (ServiceException e) {
+            System.out.println(e.getMessage());
+        }
+        String notificationBody = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.NOTIFICATION, victoryMessage);
+        connectionManager.broadcastMessageToOthers(username, gameID, resignBody);
+        connectionManager.broadcastMessage(gameID, notificationBody);
     }
 
     public WebSocketHandler(GameDataService gameDataService) {

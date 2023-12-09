@@ -102,6 +102,14 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public void resign(int gameID, String username) {
+        try {
+            sendMessage(gameID, username, UserGameCommand.CommandType.RESIGN, "");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public void handleWSMessage(String message) {
         HashMap parsedBody = new Gson().fromJson(message, HashMap.class);
         if (parsedBody.containsKey("action")) {
@@ -110,13 +118,23 @@ public class WebSocketFacade extends Endpoint {
             switch (ServerMessage.ServerMessageType.valueOf(action)) {
                 case ERROR:
                 case NOTIFICATION:
+                    if (details.contains("resigned")) {
+                        MenuBase.chessGame.gameOver = true;
+                    }
                     System.out.println(details);
+                    System.out.println(">>> ");
                     break;
                 case LOAD_GAME:
-                    ChessGameImpl newGame = new ChessGameImpl();
-                    newGame.loadGameFromString(details);
-                    ChessBoardImpl chessBoard = (ChessBoardImpl) newGame.getBoard();
-                    BoardDisplay.displayBoard(chessBoard, Objects.equals(MenuBase.orientation, "black"));
+                    ChessGameImpl loadedGame = new ChessGameImpl();
+                    loadedGame.loadGameFromString(details);
+                    MenuBase.chessGame = loadedGame;
+                    BoardDisplay.displayBoard();
+                    if (MenuBase.getInstance().isMyTurn()) {
+                        System.out.println("Your turn!");
+                    } else {
+                        System.out.println("Opponent's turn.");
+                    }
+                    System.out.println(">>> ");
                     break;
             }
         }
