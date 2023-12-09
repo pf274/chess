@@ -3,47 +3,46 @@ package ui.menus;
 import Models.AuthToken;
 import ui.facades.WebSocketFacade;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public abstract class MenuBase {
-    String title;
-
-    String subtitle;
-
-    String[] options;
 
     Scanner scanner;
 
-    public AuthToken authToken;
+    public static AuthToken authToken;
 
     public WebSocketFacade webSocketFacade;
 
+    private static MenuBase instance;
 
+    public static MenuBase getInstance() {
+        return instance;
+    }
 
-    public int gameID;
+    public static void initialize(Scanner scanner) {
+        instance = new MenuHome(scanner);
+    }
 
-    public MenuBase(String title, String subtitle, String[] options, Scanner scanner) {
-        this.title = title;
-        this.subtitle = subtitle;
-        this.options = options;
+    public static void setInstance(MenuBase newInstance) {
+        instance = newInstance;
+    }
+    public MenuBase(Scanner scanner) {
         this.scanner = scanner;
     }
-    public void display() {
-        System.out.println(title);
-        System.out.println(subtitle);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println(i + 1 + "\t" + options[i]);
-        }
+
+    protected static void setAuthToken(AuthToken authToken) {
+        MenuBase.authToken = authToken;
     }
 
-    public abstract MenuBase run();
+    public abstract void run();
 
     public static String getUserInput(Scanner scanner) {
         System.out.print(">>> ");
         return scanner.nextLine().trim().toLowerCase();
     }
 
-    public boolean isValidOption(String option) {
+    public boolean isValidOption(String option, String[] options) {
         if (isNumber(option)) {
             int optionNum = Integer.parseInt(option);
             if (optionNum > 0 && optionNum <= options.length) {
@@ -64,6 +63,12 @@ public abstract class MenuBase {
             }
         }
         return false;
+    }
+
+    public void printOptions(String[] options) {
+        for (int i = 0; i < options.length; i++) {
+            System.out.println(i + 1 + "\t" + options[i]);
+        }
     }
 
     public boolean isNumber(String option) {

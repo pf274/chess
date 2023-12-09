@@ -10,18 +10,16 @@ import java.util.Scanner;
 
 public class MenuCreateGame extends MenuBase {
 
-    public MenuCreateGame(Scanner scanner, AuthToken authToken) {
-        super("Create Game", "Create a new Game!", null, scanner);
-        this.authToken = authToken;
+    public MenuCreateGame(Scanner scanner) {
+        super(scanner);
     }
 
     @Override
-    public MenuBase run() {
+    public void run() {
         display();
-        return new MenuMain(scanner, authToken);
+        MenuBase.setInstance(new MenuMain(scanner));
     }
 
-    @Override
     public void display() {
         System.out.println("Creating new game...");
         System.out.print("Game Name: (type exit to go back) ");
@@ -33,7 +31,7 @@ public class MenuCreateGame extends MenuBase {
         body.put("gameName", gameName);
         try {
             ServerFacade serverFacade = ServerFacade.getInstance();
-            APIResponse response = serverFacade.createGame(gameName, authToken.authToken);
+            APIResponse response = serverFacade.createGame(gameName, MenuBase.authToken.authToken);
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("gameID")) {
                 int gameID = (int) Math.floor((Double) responseMap.get("gameID"));

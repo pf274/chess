@@ -16,13 +16,18 @@ import java.util.Objects;
 
 public class WebSocketFacade extends Endpoint {
 
+    private static WebSocketFacade instance = null;
+    public static WebSocketFacade getInstance() {
+        if (instance == null) {
+            instance = new WebSocketFacade();
+        }
+        return instance;
+    }
+
     private Session session;
 
-    private MenuInGame parentMenu;
-
-    public WebSocketFacade(MenuInGame parentMenu) {
+    public WebSocketFacade() {
         try {
-            this.parentMenu = parentMenu;
             String serverUrl = "ws://localhost:8080";
             URI socketURI = new URI(serverUrl + "/connect");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -51,35 +56,35 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void joinGameAsPlayer() {
+    public void joinGameAsPlayer(int gameID, String username, String teamColor) {
         try {
-            sendMessage(parentMenu.gameID, parentMenu.authToken.username, UserGameCommand.CommandType.JOIN_PLAYER, parentMenu.orientation);
+            sendMessage(gameID, username, UserGameCommand.CommandType.JOIN_PLAYER, teamColor);
             this.session.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void joinGameAsObserver() {
+    public void joinGameAsObserver(int gameID, String username) {
         try {
-            sendMessage(parentMenu.gameID, parentMenu.authToken.username, UserGameCommand.CommandType.JOIN_PLAYER, "");
+            sendMessage(gameID, username, UserGameCommand.CommandType.JOIN_PLAYER, "");
             this.session.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-    public void leaveGame() {
+    public void leaveGame(int gameID, String username) {
         try {
-            sendMessage(parentMenu.gameID, parentMenu.authToken.username, UserGameCommand.CommandType.LEAVE, "");
+            sendMessage(gameID, username, UserGameCommand.CommandType.LEAVE, "");
             this.session.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void makeMove(String move) {
+    public void makeMove(String move, int gameID, String username) {
         try {
-            sendMessage(parentMenu.gameID, parentMenu.authToken.username, UserGameCommand.CommandType.MAKE_MOVE, move);
+            sendMessage(gameID, username, UserGameCommand.CommandType.MAKE_MOVE, move);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -98,8 +103,8 @@ public class WebSocketFacade extends Endpoint {
                 case LOAD_GAME:
                     ChessGameImpl newGame = new ChessGameImpl();
                     newGame.loadGameFromString(details);
-                    this.parentMenu.chessBoard = (ChessBoardImpl) newGame.getBoard();
-                    BoardDisplay.displayBoard(this.parentMenu.chessBoard, Objects.equals(this.parentMenu.orientation, "black"));
+                    ChessBoardImpl chessBoard = (ChessBoardImpl) newGame.getBoard();
+                    BoardDisplay.displayBoard(chessBoard, Objects.equals(orientation, "black"));
                     break;
             }
         }

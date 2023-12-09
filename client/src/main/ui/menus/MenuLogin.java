@@ -15,24 +15,22 @@ public class MenuLogin extends MenuBase {
     private boolean exited = false;
     private boolean loggedIn = false;
     public MenuLogin(Scanner scanner) {
-        super("Login", "Please enter your username and password", null, scanner);
+        super(scanner);
     }
 
-    public MenuBase run() {
-        while (!exited && !loggedIn) {
-            display();
-        }
+    public void run() {
+        display();
         if (exited) {
             System.out.println("Going back...");
-            return new MenuHome(scanner);
+            MenuBase.setInstance(new MenuHome(scanner));
+        } else if (loggedIn) {
+            System.out.println("Logged in!");
+            MenuBase.setInstance(new MenuMain(scanner));
         }
-        return new MenuMain(scanner, authToken);
     }
 
-    @Override
     public void display() {
-        System.out.println(title);
-        System.out.println(subtitle);
+        System.out.println("Login\n");
         System.out.print("Username: (type exit to go back) ");
         this.username = getUserInput(scanner);
         if (username.equals("exit") || username.equals("e")) {
@@ -62,13 +60,13 @@ public class MenuLogin extends MenuBase {
             } else if (responseMap.containsKey("error")) {
                 System.out.println(responseMap.get("error"));
             } else {
-                authToken = new AuthToken(username);
-                authToken.authToken = responseMap.get("authToken").toString();
+                MenuBase.authToken = new AuthToken(username);
+                MenuBase.authToken.authToken = responseMap.get("authToken").toString();
                 loggedIn = true;
                 System.out.println("Logged in!");
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Invalid login credentials.");
         }
     }
 }

@@ -6,16 +6,14 @@ import java.util.Scanner;
 public class ClientRunner {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        MenuBase menu = new MenuHome(scanner);
+        MenuBase.initialize(scanner);
         try {
-            while (menu != null) {
-                menu = menu.run();
+            while (MenuBase.getInstance() != null) {
+                MenuBase.getInstance().run();
             }
         } catch(Exception e) {
             // System.in has been closed
             System.out.println("Client ended unexpectedly.");
         }
     }
-
-
 }

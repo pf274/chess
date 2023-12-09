@@ -13,14 +13,16 @@ import java.util.Scanner;
 public class MenuMain extends MenuBase {
     private boolean initialized = false;
 
+    private String[] options = new String[6];
+
     @Override
-    public MenuBase run() {
+    public void run() {
         if (!initialized) {
-            display();
+            printOptions(options);
             this.initialized = true;
         }
         String input = getUserInput(scanner);
-        while (!isValidOption(input)) {
+        while (!isValidOption(input, options)) {
             System.out.println("Invalid option");
             System.out.println("Options:");
             for (int i = 0; i < options.length; i++) {
@@ -32,20 +34,23 @@ public class MenuMain extends MenuBase {
             case "create game":
             case "cg":
             case "1":
-                return new MenuCreateGame(scanner, authToken);
+                MenuBase.setInstance(new MenuCreateGame(scanner));
+                break;
             case "list games":
             case "lg":
             case "2":
                 listGames();
-                return this;
+                break;
             case "join game":
             case "jg":
             case "3":
-                return new MenuJoinGame(scanner, authToken);
+                MenuBase.setInstance(new MenuJoinGame(scanner));
+                break;
             case "observe game":
             case "og":
             case "4":
-                return new MenuJoinObserver(scanner, authToken);
+                MenuBase.setInstance(new MenuJoinObserver(scanner));
+                break;
             case "help":
             case "h":
             case "5":
@@ -53,51 +58,42 @@ public class MenuMain extends MenuBase {
                 for (String option : options) {
                     System.out.println("\t" + option);
                 }
-                return this;
+                break;
             case "logout":
             case "l":
             case "6":
-                boolean logoutSuccessful = attemptLogout();
-                if (logoutSuccessful) {
-                    return new MenuHome(scanner);
-                } else {
-                    return this;
-                }
             case "exit":
-                return null;
+                attemptLogout();
+                MenuBase.setAuthToken(null);
+                MenuBase.setInstance(new MenuHome(scanner));
+                break;
             default:
                 System.out.println("Invalid input");
-                return this;
         }
     }
 
-    public MenuMain(Scanner scanner, AuthToken authToken) {
-        super("Main Menu", "Welcome to Chess!", new String[]{
-                "Create Game",
-                "List Games",
-                "Join Game",
-                "Observe Game",
-                "Help",
-                "Logout",
-        }, scanner);
-        this.authToken = authToken;
+    public MenuMain(Scanner scanner) {
+        super(scanner);
+        options[0] = "Create Game";
+        options[1] = "List Games";
+        options[2] = "Join Game";
+        options[3] = "Observe Game";
+        options[4] = "Help";
+        options[5] = "Logout";
     }
 
-    private boolean attemptLogout() {
+    private void attemptLogout() {
         System.out.println("Logging out...");
         try {
             ServerFacade serverFacade = ServerFacade.getInstance();
             APIResponse response = serverFacade.logout(authToken.authToken);
             if (response.statusCode == 200) {
                 System.out.println("Logged out!");
-                return true;
             } else {
                 System.out.println("Failed to log out");
-                return false;
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return false;
         }
     }
 

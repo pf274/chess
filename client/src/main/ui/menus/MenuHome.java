@@ -1,6 +1,7 @@
 package ui.menus;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Function;
@@ -8,22 +9,23 @@ import java.util.function.Function;
 public class MenuHome extends MenuBase {
     private boolean initialized = false;
 
+    private final String[] options = new String[4];
+
     public MenuHome(Scanner scanner) {
-        super("Main Menu", "Welcome to Chess!", new String[]{
-                "Login",
-                "Register",
-                "Help",
-                "Exit"
-        }, scanner);
+        super(scanner);
+        options[0] = "Login";
+        options[1] = "Register";
+        options[2] = "Help";
+        options[3] = "Exit";
     }
 
-    public MenuBase run() {
+    public void run() {
         if (!initialized) {
-            display();
+            printOptions(options);
             this.initialized = true;
         }
         String input = getUserInput(scanner);
-        while (!isValidOption(input)) {
+        while (!isValidOption(input, options)) {
             System.out.println("Invalid option");
             System.out.println("Options:");
             for (String option : options) {
@@ -35,26 +37,23 @@ public class MenuHome extends MenuBase {
             case "login":
             case "l":
             case "1":
-                return new MenuLogin(scanner);
+                MenuBase.setInstance(new MenuLogin(scanner));
             case "register":
             case "r":
             case "2":
-                return new MenuRegister(scanner);
+                MenuBase.setInstance(new MenuRegister(scanner));
             case "help":
             case "h":
             case "3":
                 System.out.println("Options:");
-                for (int i = 0; i < options.length; i++) {
-                    System.out.println(i + 1 + "\t" + options[i]);
-                }
-                return this;
+                printOptions(options);
+                return;
             case "exit":
             case "e":
             case "4":
-                return null;
+                MenuBase.setInstance(null); // end the program
             default:
                 System.out.println("Invalid input");
-                return this;
         }
     }
 }

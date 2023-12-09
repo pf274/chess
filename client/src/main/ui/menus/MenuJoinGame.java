@@ -3,10 +3,12 @@ package ui.menus;
 import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import ui.facades.ServerFacade;
 import ui.facades.WebSocketFacade;
 import userCommands.UserGameCommand;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -20,50 +22,44 @@ public class MenuJoinGame extends MenuBase {
     private String playerColor = null;
 
     private boolean success = false;
+    int gameID;
 
-    public MenuJoinGame(Scanner scanner, AuthToken authToken) {
-        super("Join Game", "", null, scanner);
-        this.authToken = authToken;
+    private HashMap<String, String> games = new HashMap<>();
+
+    public MenuJoinGame(Scanner scanner) {
+        super(scanner);
     }
 
     @Override
-    public MenuBase run() {
+    public void run() {
+        getListOfGames();
         display();
         if (exited) {
-            return new MenuMain(scanner, authToken);
+            MenuBase.setInstance(new MenuMain(scanner));
+        } else if (success) {
+            WebSocketFacade.getInstance().joinGameAsPlayer(gameID, authToken.username, playerColor);
+            MenuBase.setInstance(new MenuInGame(gameID, playerColor, scanner));
         }
-        if (success) {
-            MenuInGame newMenu = new MenuInGame(gameID, gameName, playerColor, scanner, authToken);
-            newMenu.webSocketFacade = new WebSocketFacade(newMenu);
-            newMenu.webSocketFacade.joinGameAsPlayer();
-            return newMenu;
-        }
-        return this;
     }
 
-    @Override
     public void display() {
         if (!initialized) {
-            System.out.println(title);
-            System.out.println(subtitle);
+            System.out.println("Join Game\n");
             this.initialized = true;
         }
-        System.out.println("Please enter a game number. (\"exit\" to go back)");
-        String input = getUserInput(scanner);
-        if (input.equals("exit")) {
-            exited = true;
-            return;
-        }
-        while (!isNumber(input)) {
-            System.out.println("Invalid input");
-            System.out.println("Please enter a game number. (\"exit\" to go back)");
+        printGames();
+        String input = "";
+        System.out.println("Please enter a game number or game name. (\"exit\" to go back)");
+        while (!games.containsKey(input.toLowerCase())) {
             input = getUserInput(scanner);
             if (input.equals("exit")) {
                 exited = true;
                 return;
             }
+            if (games.containsKey(input)) {
+                gameID = Integer.parseInt(games.get(input));
+            }
         }
-        gameID = Integer.parseInt(input);
         System.out.println("Please enter a color (white/black):");
         input = getUserInput(scanner);
         while (!input.equals("w") && !input.equals("b") && !input.equals("white") && !input.equals("black")) {
@@ -78,20 +74,52 @@ public class MenuJoinGame extends MenuBase {
         }
         playerColor = input;
         System.out.println("Joining game " + gameID + "...");
-        ServerFacade serverFacade = ServerFacade.getInstance();
-        APIResponse response = serverFacade.joinGame(authToken.authToken, gameID, playerColor);
+        success = joinGame(gameID);
+    }
+
+    private boolean joinGame(int gameID) {
+        APIResponse response = ServerFacade.getInstance().joinGame(authToken.authToken, gameID, playerColor);
         if (response.statusCode == 200) {
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("gameName")) {
                 gameName = (String) responseMap.get("gameName");
-                success = true;
+                return true;
             } else {
                 System.out.println("Error: " + response.statusMessage);
+                return false;
             }
         } else if (response.statusCode == 403) {
             System.out.println("Error: player color already taken");
+            return false;
         } else {
             System.out.println("Error: " + response.statusMessage);
+            return false;
+        }
+    }
+
+    private void getListOfGames() {
+        games.clear();
+        APIResponse response = ServerFacade.getInstance().listGames(authToken.authToken);
+        HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
+        ArrayList<LinkedTreeMap> games = (ArrayList<LinkedTreeMap>) responseMap.get("games");
+        for (LinkedTreeMap game : games) {
+            String gameID = (String) game.get("gameID");
+            String gameName = (String) game.get("gameName");
+            this.games.put(gameName.toLowerCase(), gameID);
+            this.games.put(gameID, gameID);
+        }
+    }
+
+    private void printGames() {
+        System.out.println("Games:");
+        ArrayList<String> gameNames = new ArrayList<>();
+        for (String game : games.keySet()) {
+            if (!games.get(game).equals(game)) {
+                gameNames.add(game);
+            }
+        }
+        for (String gameName : gameNames) {
+            System.out.println("\t" + gameName + " (" + games.get(gameName) + ")");
         }
     }
 }

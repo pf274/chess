@@ -10,6 +10,7 @@ import chess.ChessPositionImpl;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import serverMessages.ServerMessage;
@@ -53,7 +54,11 @@ public class WebSocketHandler {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
 
+    @OnWebSocketError
+    public void onError(Session session, String message) {
+        System.out.println(message);
     }
 
     public void connect(String username, int gameID, String details, Session session) {
@@ -70,7 +75,6 @@ public class WebSocketHandler {
             String loadBody = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.LOAD_GAME, game.game.getGameAsString());
             connectionManager.broadcastMessageToOthers(username, gameID, notificationBody);
             connectionManager.sendMessage(username, gameID, loadBody);
-            System.out.println("Finished connecting");
         } catch (ServiceException | IOException e) {
             String body = MessageFormatter.prepareBodyServer(username, gameID, ServerMessage.ServerMessageType.ERROR, "Error: invalid game");
             try {

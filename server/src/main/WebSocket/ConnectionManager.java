@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ConnectionManager {
+
+    ArrayList<Connection> gamelessConnections = new ArrayList<>();
     HashMap<Integer, ArrayList<Connection>> gameConnections = new HashMap<>();
     public void addConnection(int gameID, Session session, String username) {
         Connection newConnection = new Connection(session, username, gameID);
