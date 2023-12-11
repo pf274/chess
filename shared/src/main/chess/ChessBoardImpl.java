@@ -27,7 +27,7 @@ public class ChessBoardImpl implements ChessBoard {
     /**
      * Indicates the position where a pawn just moved two spaces (the position where an en passant can be performed)
      */
-    public ChessPosition enPassantMove = null;
+    public ChessPositionImpl enPassantMove = null;
     /**
      * The chess board
      */

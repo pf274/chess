@@ -2,11 +2,14 @@ package ui.facades;
 
 import chess.*;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import serverMessages.ServerMessage;
 import serverMessages.ServerMessageError;
 import serverMessages.ServerMessageLoadGame;
 import serverMessages.ServerMessageNotification;
 import ui.BoardDisplay;
+import deserializer.ChessPieceDeserializer;
+import deserializer.ChessPositionDeserializer;
 import ui.menus.MenuBase;
 import userCommands.*;
 
@@ -57,7 +60,10 @@ public class WebSocketFacade extends Endpoint {
 
     public void sendMessage(UserGameCommand command) {
         try {
-            String message = new Gson().toJson(command);
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(ChessPieceImpl.class, new ChessPieceDeserializer());
+            gsonBuilder.registerTypeAdapter(ChessPositionImpl.class, new ChessPositionDeserializer());
+            String message = gsonBuilder.create().toJson(command);
             this.session.getBasicRemote().sendText(message);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -94,7 +100,8 @@ public class WebSocketFacade extends Endpoint {
 
     public void makeMove(ChessMove move, int gameID) {
         try {
-            UserGameCommandMakeMove makeMoveCommand = new UserGameCommandMakeMove(MenuBase.authToken.authToken, gameID, move);
+            ChessMoveImpl moveImpl = (ChessMoveImpl) move;
+            UserGameCommandMakeMove makeMoveCommand = new UserGameCommandMakeMove(MenuBase.authToken.authToken, gameID, moveImpl);
             sendMessage(makeMoveCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -111,36 +118,43 @@ public class WebSocketFacade extends Endpoint {
     }
 
     public void handleWSMessage(String message) {
-        ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-        switch (serverMessage.getServerMessageType()) {
-            case ERROR:
-                ServerMessageError error = new Gson().fromJson(message, ServerMessageError.class);
-                System.out.println(error.errorMessage);
-                System.out.print(">>> ");
-                break;
-            case NOTIFICATION:
-                ServerMessageNotification notification = new Gson().fromJson(message, ServerMessageNotification.class);
-                System.out.println(notification.message);
-                System.out.print(">>> ");
-                break;
-            case LOAD_GAME:
-                ServerMessageLoadGame loadGame = new Gson().fromJson(message, ServerMessageLoadGame.class);
-                MenuBase.chessGame = (ChessGameImpl) loadGame.game;
-                BoardDisplay.displayBoard();
-                if (MenuBase.chessGame.isInCheckmate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                    System.out.println("Checkmate!");
-                } else if (MenuBase.chessGame.isInCheck(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                    System.out.println("Check!");
-                } else if (MenuBase.chessGame.isInStalemate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                    System.out.println("Stalemate!");
-                }
-                if (MenuBase.getInstance().isMyTurn()) {
-                    System.out.println("Your turn!");
-                } else {
-                    System.out.println("Opponent's turn.");
-                }
-                System.out.print(">>> ");
-                break;
+        try {
+            ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+            switch (serverMessage.getServerMessageType()) {
+                case ERROR:
+                    ServerMessageError error = new Gson().fromJson(message, ServerMessageError.class);
+                    System.out.println(error.errorMessage);
+                    System.out.print(">>> ");
+                    break;
+                case NOTIFICATION:
+                    ServerMessageNotification notification = new Gson().fromJson(message, ServerMessageNotification.class);
+                    System.out.println(notification.message);
+                    System.out.print(">>> ");
+                    break;
+                case LOAD_GAME:
+                    GsonBuilder gsonBuilder = new GsonBuilder();
+                    gsonBuilder.registerTypeAdapter(ChessPieceImpl.class, new ChessPieceDeserializer());
+                    gsonBuilder.registerTypeAdapter(ChessPosition.class, new ChessPositionDeserializer());
+                    ServerMessageLoadGame loadGame = gsonBuilder.create().fromJson(message, ServerMessageLoadGame.class);
+                    MenuBase.chessGame = loadGame.game;
+                    BoardDisplay.displayBoard();
+                    if (MenuBase.chessGame.isInCheckmate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                        System.out.println("Checkmate!");
+                    } else if (MenuBase.chessGame.isInCheck(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                        System.out.println("Check!");
+                    } else if (MenuBase.chessGame.isInStalemate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
+                        System.out.println("Stalemate!");
+                    }
+                    if (MenuBase.getInstance().isMyTurn()) {
+                        System.out.println("Your turn!");
+                    } else {
+                        System.out.println("Opponent's turn.");
+                    }
+                    System.out.print(">>> ");
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Error in handling websocket message: " + e.getMessage());
         }
         MenuBase.socketResponded = true;
     }

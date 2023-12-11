@@ -7,6 +7,9 @@ import Services.LoginService;
 import Services.ServiceException;
 import chess.*;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import deserializer.ChessPieceDeserializer;
+import deserializer.ChessPositionDeserializer;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -29,26 +32,29 @@ public class WebSocketHandler {
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
         System.out.println("Websocket message: " + message);
-        UserGameCommand data = new Gson().fromJson(message, UserGameCommand.class);
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(ChessPiece.class, new ChessPieceDeserializer());
+        gsonBuilder.registerTypeAdapter(ChessPosition.class, new ChessPositionDeserializer());
+        UserGameCommand data = gsonBuilder.create().fromJson(message, UserGameCommand.class);
         String authString = data.getAuthString();
         String username = getUsernameFromAuthString(authString);
         try {
             switch (data.getCommandType()) {
                 case JOIN_PLAYER:
                 case JOIN_OBSERVER:
-                    UserGameCommandJoinPlayer joinPlayerCommand = (UserGameCommandJoinPlayer) data;
+                    UserGameCommandJoinPlayer joinPlayerCommand = gsonBuilder.create().fromJson(message, UserGameCommandJoinPlayer.class);
                     connect(joinPlayerCommand.gameID, joinPlayerCommand.playerColor, username, session);
                     break;
                 case LEAVE:
-                    UserGameCommandLeave leaveCommand = (UserGameCommandLeave) data;
+                    UserGameCommandLeave leaveCommand = gsonBuilder.create().fromJson(message, UserGameCommandLeave.class);
                     disconnect(username, leaveCommand.gameID);
                     break;
                 case RESIGN:
-                    UserGameCommandResign resignCommand = (UserGameCommandResign) data;
+                    UserGameCommandResign resignCommand = gsonBuilder.create().fromJson(message, UserGameCommandResign.class);
                     resign(username, resignCommand.gameID);
                     break;
                 case MAKE_MOVE:
-                    UserGameCommandMakeMove makeMoveCommand = (UserGameCommandMakeMove) data;
+                    UserGameCommandMakeMove makeMoveCommand = gsonBuilder.create().fromJson(message, UserGameCommandMakeMove.class);
                     attemptMove(username, makeMoveCommand.gameID, makeMoveCommand.move);
             }
         } catch (Exception e) {

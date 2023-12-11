@@ -1,13 +1,12 @@
 package serverMessages;
 
-import Models.Game;
 import chess.ChessGame;
+import chess.ChessGameImpl;
 
 public class ServerMessageLoadGame extends ServerMessage {
 
-    public final ChessGame game;
-    ServerMessageType serverMessageType = ServerMessageType.NOTIFICATION;
-    public ServerMessageLoadGame(ChessGame game) {
+    public final ChessGameImpl game;
+    public ServerMessageLoadGame(ChessGameImpl game) {
         super(ServerMessageType.LOAD_GAME);
         this.game = game;
     }

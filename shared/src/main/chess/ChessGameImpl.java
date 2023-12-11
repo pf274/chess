@@ -44,6 +44,15 @@ public class ChessGameImpl implements ChessGame {
             return null;
         }
         var validMoves = selectedPiece.pieceMoves(boardInstance, startPosition);
+        if (selectedPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            ChessPositionImpl attackLeft = new ChessPositionImpl(startPosition.getRow() + (selectedPiece.getTeamColor() == TeamColor.WHITE ? 1 : -1), startPosition.getColumn() - 1);
+            ChessPositionImpl attackRight = new ChessPositionImpl(startPosition.getRow() + (selectedPiece.getTeamColor() == TeamColor.WHITE ? 1 : -1), startPosition.getColumn() + 1);
+            if (attackRight.equals(boardInstance.enPassantMove)) {
+                validMoves.add(new ChessMoveImpl(startPosition, attackRight, null));
+            } else if (attackLeft.equals(boardInstance.enPassantMove)) {
+                validMoves.add(new ChessMoveImpl(startPosition, attackLeft, null));
+            }
+        }
         validMoves.removeIf(validMove -> !isSafeMove(boardInstance, selectedPiece.getTeamColor(), validMove));
         // remove illegal castle
         if (selectedPiece.getPieceType() == ChessPiece.PieceType.KING) {
