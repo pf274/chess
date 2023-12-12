@@ -25,6 +25,7 @@ public class GameDAO implements DAO {
             game.blackUsername = resultSet.getString("blackUser");
             game.whiteUsername = resultSet.getString("whiteUser");
             game.moveNumber = resultSet.getInt("moveNumber");
+            game.gameOver = Objects.equals(resultSet.getString("gameOver"), "true");
             // load the game
             var gameState = resultSet.getString("gameState");
             game.game.loadGameFromString(gameState);
@@ -260,13 +261,14 @@ public class GameDAO implements DAO {
     public void saveGame(Game game) throws DataAccessException {
         var connection = database.getConnection();
         try {
-            var command = "UPDATE gameinfo SET whiteUser = ?, blackUser = ?, moveNumber = ?, gameState = ? WHERE gameID = ?";
+            var command = "UPDATE gameinfo SET whiteUser = ?, blackUser = ?, moveNumber = ?, gameState = ?, gameOver = ? WHERE gameID = ?";
             var preparedStatement = connection.prepareStatement(command);
             preparedStatement.setString(1, game.whiteUsername);
             preparedStatement.setString(2, game.blackUsername);
             preparedStatement.setInt(3, game.moveNumber);
             preparedStatement.setString(4, game.game.getGameAsString());
-            preparedStatement.setInt(5, game.gameID);
+            preparedStatement.setString(5, game.gameOver ? "true" : "false");
+            preparedStatement.setInt(6, game.gameID);
             preparedStatement.execute();
             database.returnConnection(connection);
         } catch (SQLException e) {

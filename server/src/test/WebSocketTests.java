@@ -6,6 +6,8 @@ import org.junit.jupiter.api.*;
 import passoffTests.obfuscatedTestClasses.TestServerFacade;
 import passoffTests.testClasses.TestClient;
 import passoffTests.testClasses.TestModels;
+
+import javax.websocket.DeploymentException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -42,44 +44,47 @@ public class WebSocketTests {
 
     @BeforeAll
     public static void init() {
-        serverFacade = new TestServerFacade("localhost", ChessTests.TestFactory.getServerPort());
-        serverFacade.clear();
+        try {
+            serverFacade = new TestServerFacade("localhost", ChessTests.TestFactory.getServerPort());
+            serverFacade.clear();
+            bobClient = new TestClient();
+            bobClient.setServerHost("localhost");
+            bobClient.setServerPort(ChessTests.TestFactory.getServerPort());
+            bobClient.setContext("/connect");
 
-        bobClient = new TestClient();
-        bobClient.setServerHost("localhost");
-        bobClient.setServerPort(ChessTests.TestFactory.getServerPort());
-        bobClient.setContext("/connect");
+            jamesClient = new TestClient();
+            jamesClient.setServerHost("localhost");
+            jamesClient.setServerPort(ChessTests.TestFactory.getServerPort());
+            jamesClient.setContext("/connect");
 
-        jamesClient = new TestClient();
-        jamesClient.setServerHost("localhost");
-        jamesClient.setServerPort(ChessTests.TestFactory.getServerPort());
-        jamesClient.setContext("/connect");
-
-        alfredClient = new TestClient();
-        alfredClient.setServerHost("localhost");
-        alfredClient.setServerPort(ChessTests.TestFactory.getServerPort());
-        alfredClient.setContext("/connect");
+            alfredClient = new TestClient();
+            alfredClient.setServerHost("localhost");
+            alfredClient.setServerPort(ChessTests.TestFactory.getServerPort());
+            alfredClient.setContext("/connect");
 
 
-        //set Bob details
-        userBob = new TestModels.TestUser();
-        userBob.username = "bob";
-        userBob.password = "BOB";
-        userBob.email = "bob@BOB";
+            //set Bob details
+            userBob = new TestModels.TestUser();
+            userBob.username = "bob";
+            userBob.password = "BOB";
+            userBob.email = "bob@BOB";
 
-        //set James details
-        userJames = new TestModels.TestUser();
-        userJames.username = "James";
-        userJames.password = "1234";
-        userJames.email = "pepporoni@pizza.net";
+            //set James details
+            userJames = new TestModels.TestUser();
+            userJames.username = "James";
+            userJames.password = "1234";
+            userJames.email = "pepporoni@pizza.net";
 
-        //set Alfred details
-        userAlfred = new TestModels.TestUser();
-        userAlfred.username = "Alfred";
-        userAlfred.password = "Bruce";
-        userAlfred.email = "Batman@Mr.Wayne";
+            //set Alfred details
+            userAlfred = new TestModels.TestUser();
+            userAlfred.username = "Alfred";
+            userAlfred.password = "Bruce";
+            userAlfred.email = "Batman@Mr.Wayne";
 
-        waitTime = ChessTests.TestFactory.getMessageTime();
+            waitTime = ChessTests.TestFactory.getMessageTime();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 
@@ -166,10 +171,10 @@ public class WebSocketTests {
         CountDownLatch readyLatch = new CountDownLatch(1);
         List<TestModels.TestMessage> bobMessages = new ArrayList<>();
         bobClient.connect();
-        testExecutor.submit(bobClient.getSendMessageRunnable(joinCommand, readyLatch));
-        Future<List<TestModels.TestMessage>> bobResult =
-                bobExecutor.submit(new GetServerMessages(1, bobClient, readyLatch, waitTime));
-
+        var toSubmit = bobClient.getSendMessageRunnable(joinCommand, readyLatch);
+        testExecutor.submit(toSubmit);
+        var messages = new GetServerMessages(1, bobClient, readyLatch, waitTime);
+        Future<List<TestModels.TestMessage>> bobResult = bobExecutor.submit(messages);
         try {
             bobMessages = bobResult.get(waitTime * 2, TimeUnit.MILLISECONDS);
         } catch (TimeoutException ignore) {}

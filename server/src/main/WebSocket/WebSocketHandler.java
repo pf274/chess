@@ -1,6 +1,7 @@
 package WebSocket;
 
 import DAO.DataAccessException;
+import Models.AuthToken;
 import Models.Game;
 import Services.GameDataService;
 import Services.LoginService;
@@ -38,6 +39,11 @@ public class WebSocketHandler {
         UserGameCommand data = gsonBuilder.create().fromJson(message, UserGameCommand.class);
         String authString = data.getAuthString();
         String username = getUsernameFromAuthString(authString);
+        if (username == null) {
+            ServerMessageError error = new ServerMessageError("Error: invalid auth token");
+            connectionManager.sendMessageToSession(session, error);
+            return;
+        }
         try {
             switch (data.getCommandType()) {
                 case JOIN_PLAYER:
@@ -70,8 +76,25 @@ public class WebSocketHandler {
 
     public void connect(int gameID, chess.ChessGame.TeamColor playerColor, String username, Session session) {
         try {
-            connectionManager.addConnection(gameID, session, username);
             Game game = gameDataService.getGame(gameID);
+            if (game == null) {
+                ServerMessageError error = new ServerMessageError("Error: invalid game");
+                connectionManager.sendMessageToSession(session, error);
+                return;
+            }
+            if (playerColor != null) {
+                if (playerColor.toString().equalsIgnoreCase("white") && !Objects.equals(game.whiteUsername, username)) {
+                    ServerMessageError error = new ServerMessageError("Error: wrong color");
+                    connectionManager.sendMessageToSession(session, error);
+                    return;
+                }
+                if (playerColor.toString().equalsIgnoreCase("black") && !Objects.equals(game.blackUsername, username)) {
+                    ServerMessageError error = new ServerMessageError("Error: wrong color");
+                    connectionManager.sendMessageToSession(session, error);
+                    return;
+                }
+            }
+            connectionManager.addConnection(gameID, session, username);
             String message = username + " has connected to the game";
             if (playerColor == ChessGame.TeamColor.WHITE) {
                 message = message + " as white.";
@@ -111,6 +134,26 @@ public class WebSocketHandler {
     public void attemptMove(String username, int gameID, ChessMove move) throws IOException {
         try {
             Game loadedGame = gameDataService.getGame(gameID);
+            if (loadedGame == null) {
+                ServerMessageError error = new ServerMessageError("Error: invalid game");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
+            if (loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE && !Objects.equals(loadedGame.whiteUsername, username)) {
+                ServerMessageError error = new ServerMessageError("Error: not your turn");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
+            if (loadedGame.game.getTeamTurn() == ChessGame.TeamColor.BLACK && !Objects.equals(loadedGame.blackUsername, username)) {
+                ServerMessageError error = new ServerMessageError("Error: not your turn");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
+            if (loadedGame.gameOver) {
+                ServerMessageError error = new ServerMessageError("Error: game already over");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
             ChessPositionImpl startingPosition = (ChessPositionImpl) move.getStartPosition();
             ChessPositionImpl endingPosition = (ChessPositionImpl) move.getEndPosition();
             ChessMoveImpl chessMove = new ChessMoveImpl(startingPosition, endingPosition, null);
@@ -118,6 +161,8 @@ public class WebSocketHandler {
             gameDataService.saveGame(loadedGame);
             ServerMessageLoadGame loadGameMessage = new ServerMessageLoadGame(loadedGame.game);
             connectionManager.broadcastMessage(gameID, loadGameMessage);
+            ServerMessageNotification playerMovedNotification = new ServerMessageNotification(username + " has moved.");
+            connectionManager.broadcastMessageToOthers(username, gameID, playerMovedNotification);
 
         } catch (ServiceException | InvalidMoveException e) {
             ServerMessageError error = new ServerMessageError("Error: invalid move");
@@ -129,12 +174,28 @@ public class WebSocketHandler {
         ServerMessageNotification resignNotification = new ServerMessageNotification(username + " has resigned.");
         try {
             Game loadedGame = gameDataService.getGame(gameID);
+            if (loadedGame == null) {
+                ServerMessageError error = new ServerMessageError("Error: invalid game");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
+            if (loadedGame.gameOver) {
+                ServerMessageError error = new ServerMessageError("Error: game already over");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
+            if (!Objects.equals(loadedGame.whiteUsername, username) && !Objects.equals(loadedGame.blackUsername, username)) {
+                ServerMessageError error = new ServerMessageError("Error: not playing in this game");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
             loadedGame.gameOver = true;
             gameDataService.saveGame(loadedGame);
-        } catch (ServiceException e) {
+            connectionManager.broadcastMessage(gameID, resignNotification);
+        } catch (ServiceException | IOException e) {
             System.out.println(e.getMessage());
         }
-        connectionManager.broadcastMessageToOthers(username, gameID, resignNotification);
+
     }
 
     public WebSocketHandler(GameDataService gameDataService, LoginService loginService) {
@@ -144,7 +205,11 @@ public class WebSocketHandler {
 
     public String getUsernameFromAuthString(String authString) {
         try {
-            return loginService.authDAO.getAuthToken(authString).username;
+            AuthToken authToken = loginService.authDAO.getAuthToken(authString);
+            if (authToken == null) {
+                return null;
+            }
+            return authToken.username;
         } catch (DataAccessException e) {
             System.out.println(e.getMessage());
             return null;

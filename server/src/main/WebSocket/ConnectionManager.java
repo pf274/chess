@@ -38,6 +38,7 @@ public class ConnectionManager {
         System.out.println("Broadcasting message to all participants of game " + gameID + ": " + messageString);
         if (gameConnections.containsKey(gameID)) {
             for (Connection connection : gameConnections.get(gameID)) {
+                System.out.println("(Sending message to " + connection.getUsername() + ": " + messageString + ")");
                 connection.getSession().getRemote().sendString(messageString);
             }
         }
@@ -62,7 +63,7 @@ public class ConnectionManager {
     public void sendMessage(String username, int gameID, ServerMessage message) {
         try {
             String messageString = new Gson().toJson(message);
-            System.out.println("Broadcasting message to " + username + ": " + message);
+            System.out.println("Broadcasting message to " + username + ": " + messageString);
             if (gameConnections.containsKey(gameID)) {
                 for (Connection connection: gameConnections.get(gameID)) {
                     if (connection.getUsername().equals(username)) {
@@ -71,6 +72,16 @@ public class ConnectionManager {
                     }
                 }
             }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void sendMessageToSession(Session session, ServerMessage message) {
+        try {
+            String messageString = new Gson().toJson(message);
+            System.out.println("Broadcasting message to " + session + ": " + messageString);
+            session.getRemote().sendString(messageString);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

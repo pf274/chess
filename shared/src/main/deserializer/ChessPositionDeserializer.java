@@ -15,7 +15,7 @@ public class ChessPositionDeserializer implements JsonSerializer<ChessPosition>,
     public JsonElement serialize(ChessPosition src, Type srcType, JsonSerializationContext context) throws JsonParseException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("row", new JsonPrimitive(src.getRow()));
-        jsonObject.add("col", new JsonPrimitive(src.getColumn()));
+        jsonObject.add("column", new JsonPrimitive(src.getColumn()));
         return jsonObject;
     }
 
@@ -24,8 +24,8 @@ public class ChessPositionDeserializer implements JsonSerializer<ChessPosition>,
         JsonObject jsonObject = json.getAsJsonObject();
         try {
             int row = jsonObject.get("row").getAsInt();
-            int col = jsonObject.get("col").getAsInt();
-            return new ChessPositionImpl(row, col);
+            int column = jsonObject.get("column").getAsInt();
+            return new ChessPositionImpl(row, column);
         } catch (Exception e) {
 //            System.out.println("Error 1: " + e.getMessage());
         }

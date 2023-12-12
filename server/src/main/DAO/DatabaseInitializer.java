@@ -21,6 +21,7 @@ public class DatabaseInitializer {
                     "  `gameName` VARCHAR(45) NOT NULL,\n" +
                     "  `turn` VARCHAR(5) NOT NULL DEFAULT \"WHITE\",\n" +
                     "  `gameState` VARCHAR(100) NOT NULL DEFAULT \"" + defaultGameState +  "\",\n" +
+                    "  `gameOver` VARCHAR(5) NOT NULL DEFAULT \"false\",\n" +
                     "  `moveNumber` int NOT NULL DEFAULT 0,\n" +
                     "  PRIMARY KEY (`gameID`));",
             // if chess.gameHistory table exists, drop it
