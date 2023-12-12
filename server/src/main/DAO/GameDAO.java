@@ -232,24 +232,20 @@ public class GameDAO implements DAO {
     public void addUserToGame(int gameID, String username, String playerColor) throws DataAccessException {
         var connection = database.getConnection();
         try {
-            if (playerColor == null) {
-                String command = "INSERT INTO gamespectators (gameID, username) VALUES (?, ?)";
-                var preparedStatement = connection.prepareStatement(command);
-                preparedStatement.setInt(1, gameID);
-                preparedStatement.setString(2, username);
-                preparedStatement.execute();
-            } else if (playerColor.equalsIgnoreCase("WHITE")) {
-                String command = "UPDATE gameinfo SET whiteUser = ? WHERE gameID = ?";
-                var preparedStatement = connection.prepareStatement(command);
-                preparedStatement.setString(1, username);
-                preparedStatement.setInt(2, gameID);
-                preparedStatement.execute();
-            } else {
-                String command = "UPDATE gameinfo SET blackUser = ? WHERE gameID = ?";
-                var preparedStatement = connection.prepareStatement(command);
-                preparedStatement.setString(1, username);
-                preparedStatement.setInt(2, gameID);
-                preparedStatement.execute();
+            if (playerColor != null) {
+                if (playerColor.equalsIgnoreCase("WHITE")) {
+                    String command = "UPDATE gameinfo SET whiteUser = ? WHERE gameID = ?";
+                    var preparedStatement = connection.prepareStatement(command);
+                    preparedStatement.setString(1, username);
+                    preparedStatement.setInt(2, gameID);
+                    preparedStatement.execute();
+                } else if (playerColor.equalsIgnoreCase("BLACK")) {
+                    String command = "UPDATE gameinfo SET blackUser = ? WHERE gameID = ?";
+                    var preparedStatement = connection.prepareStatement(command);
+                    preparedStatement.setString(1, username);
+                    preparedStatement.setInt(2, gameID);
+                    preparedStatement.execute();
+                }
             }
             database.returnConnection(connection);
         } catch (SQLException e) {

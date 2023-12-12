@@ -166,9 +166,9 @@ public class WebSocketHandler {
             // make the move
             loadedGame.game.makeMove(move);
             // check if the game is over
-            boolean checkmated = loadedGame.game.isInCheckmate(loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
-            boolean inCheck = loadedGame.game.isInCheck(loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
-            boolean stalemate = loadedGame.game.isInStalemate(loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+            boolean checkmated = loadedGame.game.isInCheckmate(loadedGame.game.getTeamTurn());
+            boolean inCheck = loadedGame.game.isInCheck(loadedGame.game.getTeamTurn());
+            boolean stalemate = loadedGame.game.isInStalemate(loadedGame.game.getTeamTurn());
             if (checkmated) {
                 loadedGame.gameOver = true;
                 ServerMessageNotification checkmateNotification = new ServerMessageNotification("Checkmate! " + (loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? loadedGame.whiteUsername : loadedGame.blackUsername) + " wins!");

@@ -72,7 +72,6 @@ public class MenuInGame extends MenuBase {
             case "leave":
             case "l":
             case "6":
-                WebSocketFacade.getInstance().leaveGame(gameID);
                 this.exited = true;
                 break;
         }

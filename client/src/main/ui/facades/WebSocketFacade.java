@@ -143,7 +143,7 @@ public class WebSocketFacade extends Endpoint {
                     if (!MenuBase.chessGame.gameOver) {
                         if (MenuBase.getInstance().isMyTurn()) {
                             System.out.println("Your turn!");
-                        } else {
+                        } else if (MenuBase.playerColor != null) {
                             System.out.println("Opponent's turn.");
                         }
                     }

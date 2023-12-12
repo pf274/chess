@@ -32,12 +32,12 @@ public class MenuJoinObserver extends MenuBase {
         display();
         if (exited) {
             MenuBase.setInstance(new MenuMain(scanner));
-        }
-        if (success) {
+        } else if (success) {
             WebSocketFacade.getInstance().joinGameAsObserver(gameID);
             MenuBase.setInstance(new MenuObservingGame(gameID, scanner));
+        } else {
+            MenuBase.setInstance(new MenuMain(scanner));
         }
-        MenuBase.setInstance(new MenuMain(scanner));
     }
 
     public void display() {
