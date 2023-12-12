@@ -171,7 +171,7 @@ public class WebSocketHandler {
             boolean stalemate = loadedGame.game.isInStalemate(loadedGame.game.getTeamTurn());
             if (checkmated) {
                 loadedGame.gameOver = true;
-                ServerMessageNotification checkmateNotification = new ServerMessageNotification("Checkmate! " + (loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? loadedGame.whiteUsername : loadedGame.blackUsername) + " wins!");
+                ServerMessageNotification checkmateNotification = new ServerMessageNotification("Checkmate! " + (loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? loadedGame.blackUsername : loadedGame.whiteUsername) + " wins!");
                 connectionManager.broadcastMessage(gameID, checkmateNotification);
             } else if (inCheck) {
                 ServerMessageNotification checkNotification = new ServerMessageNotification("Check!");
