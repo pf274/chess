@@ -65,11 +65,6 @@ public class MenuInGame extends MenuBase {
             case "3":
                 highlightLegalMoves();
                 break;
-            case "help":
-            case "h":
-            case "4":
-//                printOptions(options);
-                break;
             case "resign":
             case "r":
             case "5":
