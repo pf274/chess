@@ -18,14 +18,6 @@ import java.util.Objects;
 public class Server {
 
     /**
-     * The default route handler, which is used to handle requests that don't match any of the other routes.
-     */
-    private static final Route defaultRouteHandler = (req, res) -> {
-        ResponseMapper.exceptionResponse(404, "path not found.", res);
-        return null;
-    };
-
-    /**
      * The server's gameDAO
      */
     private final GameDAO gameDAO = new GameDAO();
@@ -131,14 +123,6 @@ public class Server {
         // joinGameHandler routes
         Spark.put("/game", serverInstance.joinGameHandler.joinGame);
         Spark.delete("/game", serverInstance.joinGameHandler.leaveGame);
-
-        // default routes
-//        Spark.path("*", () -> {
-//            Spark.get("", defaultRouteHandler);
-//            Spark.post("", defaultRouteHandler);
-//            Spark.delete("", defaultRouteHandler);
-//            Spark.put("", defaultRouteHandler);
-//        });
 
         // set response type
         Spark.after((request, response) -> {

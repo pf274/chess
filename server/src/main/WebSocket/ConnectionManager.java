@@ -33,14 +33,18 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastMessage(int gameID, ServerMessage message) throws IOException {
-        String messageString = new Gson().toJson(message);
-        System.out.println("Broadcasting message to all participants of game " + gameID + ": " + messageString);
-        if (gameConnections.containsKey(gameID)) {
-            for (Connection connection : gameConnections.get(gameID)) {
-                System.out.println("(Sending message to " + connection.getUsername() + ": " + messageString + ")");
-                connection.getSession().getRemote().sendString(messageString);
+    public void broadcastMessage(int gameID, ServerMessage message) {
+        try {
+            String messageString = new Gson().toJson(message);
+            System.out.println("Broadcasting message to all participants of game " + gameID + ": " + messageString);
+            if (gameConnections.containsKey(gameID)) {
+                for (Connection connection : gameConnections.get(gameID)) {
+                    System.out.println("(Sending message to " + connection.getUsername() + ": " + messageString + ")");
+                    connection.getSession().getRemote().sendString(messageString);
+                }
             }
+        } catch (IOException e) {
+            System.out.println("Error broadcasting message to all: " + e.getMessage());
         }
     }
 
@@ -56,7 +60,7 @@ public class ConnectionManager {
                 }
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error broadcasting message to others: " + e.getMessage());
         }
     }
 
@@ -73,7 +77,7 @@ public class ConnectionManager {
                 }
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error sending message to " + username + " in game " + gameID + ": " + e.getMessage());
         }
     }
 
@@ -83,7 +87,7 @@ public class ConnectionManager {
             System.out.println("Broadcasting message to " + session + ": " + messageString);
             session.getRemote().sendString(messageString);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error sending message to session: " + e.getMessage());
         }
     }
 }

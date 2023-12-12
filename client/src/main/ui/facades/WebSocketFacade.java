@@ -132,23 +132,20 @@ public class WebSocketFacade extends Endpoint {
                     System.out.print(">>> ");
                     break;
                 case LOAD_GAME:
+                    // deserialize the game
                     GsonBuilder gsonBuilder = new GsonBuilder();
                     gsonBuilder.registerTypeAdapter(ChessPieceImpl.class, new ChessPieceDeserializer());
                     gsonBuilder.registerTypeAdapter(ChessPosition.class, new ChessPositionDeserializer());
                     ServerMessageLoadGame loadGame = gsonBuilder.create().fromJson(message, ServerMessageLoadGame.class);
                     MenuBase.chessGame = loadGame.game;
+                    // display the board and notify the user whose turn it is
                     BoardDisplay.displayBoard();
-                    if (MenuBase.chessGame.isInCheckmate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                        System.out.println("Checkmate!");
-                    } else if (MenuBase.chessGame.isInCheck(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                        System.out.println("Check!");
-                    } else if (MenuBase.chessGame.isInStalemate(ChessGame.TeamColor.valueOf(MenuBase.playerColor.toUpperCase()))) {
-                        System.out.println("Stalemate!");
-                    }
-                    if (MenuBase.getInstance().isMyTurn()) {
-                        System.out.println("Your turn!");
-                    } else {
-                        System.out.println("Opponent's turn.");
+                    if (!MenuBase.chessGame.gameOver) {
+                        if (MenuBase.getInstance().isMyTurn()) {
+                            System.out.println("Your turn!");
+                        } else {
+                            System.out.println("Opponent's turn.");
+                        }
                     }
                     System.out.print(">>> ");
                     break;

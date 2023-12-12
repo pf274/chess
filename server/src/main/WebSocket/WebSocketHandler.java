@@ -7,7 +7,6 @@ import Services.GameDataService;
 import Services.LoginService;
 import Services.ServiceException;
 import chess.*;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import deserializer.ChessPieceDeserializer;
 import deserializer.ChessPositionDeserializer;
@@ -19,7 +18,6 @@ import serverMessages.ServerMessageError;
 import serverMessages.ServerMessageLoadGame;
 import serverMessages.ServerMessageNotification;
 import userCommands.*;
-import java.io.IOException;
 import java.util.Objects;
 
 @WebSocket
@@ -32,10 +30,12 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
-        System.out.println("Websocket message: " + message);
+        System.out.println("Websocket incoming message: " + message);
+        // make gson builder
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(ChessPiece.class, new ChessPieceDeserializer());
         gsonBuilder.registerTypeAdapter(ChessPosition.class, new ChessPositionDeserializer());
+        // check authorization
         UserGameCommand data = gsonBuilder.create().fromJson(message, UserGameCommand.class);
         String authString = data.getAuthString();
         String username = getUsernameFromAuthString(authString);
@@ -44,27 +44,26 @@ public class WebSocketHandler {
             connectionManager.sendMessageToSession(session, error);
             return;
         }
-        try {
-            switch (data.getCommandType()) {
-                case JOIN_PLAYER:
-                case JOIN_OBSERVER:
-                    UserGameCommandJoinPlayer joinPlayerCommand = gsonBuilder.create().fromJson(message, UserGameCommandJoinPlayer.class);
-                    connect(joinPlayerCommand.gameID, joinPlayerCommand.playerColor, username, session);
-                    break;
-                case LEAVE:
-                    UserGameCommandLeave leaveCommand = gsonBuilder.create().fromJson(message, UserGameCommandLeave.class);
-                    disconnect(username, leaveCommand.gameID);
-                    break;
-                case RESIGN:
-                    UserGameCommandResign resignCommand = gsonBuilder.create().fromJson(message, UserGameCommandResign.class);
-                    resign(username, resignCommand.gameID);
-                    break;
-                case MAKE_MOVE:
-                    UserGameCommandMakeMove makeMoveCommand = gsonBuilder.create().fromJson(message, UserGameCommandMakeMove.class);
-                    attemptMove(username, makeMoveCommand.gameID, makeMoveCommand.move);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        // handle message based on type
+        switch (data.getCommandType()) {
+            case JOIN_PLAYER:
+            case JOIN_OBSERVER:
+                UserGameCommandJoinPlayer joinPlayerCommand = gsonBuilder.create().fromJson(message, UserGameCommandJoinPlayer.class);
+                connect(joinPlayerCommand.gameID, joinPlayerCommand.playerColor, username, session);
+                break;
+            case LEAVE:
+                UserGameCommandLeave leaveCommand = gsonBuilder.create().fromJson(message, UserGameCommandLeave.class);
+                disconnect(username, leaveCommand.gameID);
+                break;
+            case RESIGN:
+                UserGameCommandResign resignCommand = gsonBuilder.create().fromJson(message, UserGameCommandResign.class);
+                resign(username, resignCommand.gameID);
+                break;
+            case MAKE_MOVE:
+                UserGameCommandMakeMove makeMoveCommand = gsonBuilder.create().fromJson(message, UserGameCommandMakeMove.class);
+                attemptMove(username, makeMoveCommand.gameID, makeMoveCommand.move);
+            default:
+                System.out.println("Error: invalid command type");
         }
     }
 
@@ -77,6 +76,7 @@ public class WebSocketHandler {
     public void connect(int gameID, chess.ChessGame.TeamColor playerColor, String username, Session session) {
         try {
             Game game = gameDataService.getGame(gameID);
+            // check for errors
             if (game == null) {
                 ServerMessageError error = new ServerMessageError("Error: invalid game");
                 connectionManager.sendMessageToSession(session, error);
@@ -94,6 +94,7 @@ public class WebSocketHandler {
                     return;
                 }
             }
+            // send notifications
             connectionManager.addConnection(gameID, session, username);
             String message = username + " has connected to the game";
             if (playerColor == ChessGame.TeamColor.WHITE) {
@@ -117,23 +118,36 @@ public class WebSocketHandler {
     public void disconnect(String username, int gameID) {
         try {
             Game loadedGame = gameDataService.getGame(gameID);
+            // check for errors
+            if (loadedGame == null) {
+                ServerMessageError error = new ServerMessageError("Error: invalid game");
+                connectionManager.sendMessage(username, gameID, error);
+                return;
+            }
+            // remove user from the game
+            boolean disconnected = false;
             if (Objects.equals(loadedGame.whiteUsername, username)) {
                 loadedGame.whiteUsername = null;
                 gameDataService.saveGame(loadedGame);
+                disconnected = true;
             } else if (Objects.equals(loadedGame.blackUsername, username)) {
                 loadedGame.blackUsername = null;
                 gameDataService.saveGame(loadedGame);
+                disconnected = true;
+            }
+            if (disconnected) {
+                ServerMessageNotification notification = new ServerMessageNotification(username + " has disconnected from the game.");
+                connectionManager.broadcastMessageToOthers(username, gameID, notification);
+                connectionManager.removeConnection(gameID, username);
             }
         } catch (ServiceException e) {
             System.out.println(e.getMessage());
         }
-        ServerMessageNotification notification = new ServerMessageNotification(username + " has disconnected from the game.");
-        connectionManager.broadcastMessageToOthers(username, gameID, notification);
-        connectionManager.removeConnection(gameID, username);
     }
-    public void attemptMove(String username, int gameID, ChessMove move) throws IOException {
+    public void attemptMove(String username, int gameID, ChessMove move) {
         try {
             Game loadedGame = gameDataService.getGame(gameID);
+            // check for errors
             if (loadedGame == null) {
                 ServerMessageError error = new ServerMessageError("Error: invalid game");
                 connectionManager.sendMessage(username, gameID, error);
@@ -154,17 +168,34 @@ public class WebSocketHandler {
                 connectionManager.sendMessage(username, gameID, error);
                 return;
             }
-            ChessPositionImpl startingPosition = (ChessPositionImpl) move.getStartPosition();
-            ChessPositionImpl endingPosition = (ChessPositionImpl) move.getEndPosition();
-            ChessMoveImpl chessMove = new ChessMoveImpl(startingPosition, endingPosition, null);
-            loadedGame.game.makeMove(chessMove);
+            // make the move
+            loadedGame.game.makeMove(move);
+            // check if the game is over
+            boolean checkmated = loadedGame.game.isInCheckmate(loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+            boolean inCheck = loadedGame.game.isInCheck(loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+            boolean stalemate = loadedGame.game.isInStalemate(loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+            if (checkmated) {
+                loadedGame.gameOver = true;
+                ServerMessageNotification checkmateNotification = new ServerMessageNotification("Checkmate! " + (loadedGame.game.getTeamTurn() == ChessGame.TeamColor.WHITE ? loadedGame.whiteUsername : loadedGame.blackUsername) + " wins!");
+                connectionManager.broadcastMessage(gameID, checkmateNotification);
+            } else if (inCheck) {
+                ServerMessageNotification checkNotification = new ServerMessageNotification("Check!");
+                connectionManager.broadcastMessage(gameID, checkNotification);
+            } else if (stalemate) {
+                loadedGame.gameOver = true;
+                ServerMessageNotification stalemateNotification = new ServerMessageNotification("Stalemate!");
+                connectionManager.broadcastMessage(gameID, stalemateNotification);
+            }
+            // save the game
             gameDataService.saveGame(loadedGame);
+            // send messages to all players
             ServerMessageLoadGame loadGameMessage = new ServerMessageLoadGame(loadedGame.game);
             connectionManager.broadcastMessage(gameID, loadGameMessage);
             ServerMessageNotification playerMovedNotification = new ServerMessageNotification(username + " has moved.");
             connectionManager.broadcastMessageToOthers(username, gameID, playerMovedNotification);
-
-        } catch (ServiceException | InvalidMoveException e) {
+        } catch (ServiceException e) {
+            System.out.println("Error making move: " + e.getMessage());
+        } catch (InvalidMoveException e) {
             ServerMessageError error = new ServerMessageError("Error: invalid move");
             connectionManager.sendMessage(username, gameID, error);
         }
@@ -174,6 +205,7 @@ public class WebSocketHandler {
         ServerMessageNotification resignNotification = new ServerMessageNotification(username + " has resigned.");
         try {
             Game loadedGame = gameDataService.getGame(gameID);
+            // check for errors
             if (loadedGame == null) {
                 ServerMessageError error = new ServerMessageError("Error: invalid game");
                 connectionManager.sendMessage(username, gameID, error);
@@ -189,11 +221,12 @@ public class WebSocketHandler {
                 connectionManager.sendMessage(username, gameID, error);
                 return;
             }
+            // send messages to all players
             loadedGame.gameOver = true;
             gameDataService.saveGame(loadedGame);
             connectionManager.broadcastMessage(gameID, resignNotification);
-        } catch (ServiceException | IOException e) {
-            System.out.println(e.getMessage());
+        } catch (ServiceException e) {
+            System.out.println("Error resigning: " + e.getMessage());
         }
 
     }
@@ -211,7 +244,7 @@ public class WebSocketHandler {
             }
             return authToken.username;
         } catch (DataAccessException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error getting username from auth string: " + e.getMessage());
             return null;
         }
     }
