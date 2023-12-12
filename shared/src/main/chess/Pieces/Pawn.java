@@ -25,11 +25,11 @@ public class Pawn extends ChessPieceImpl {
         ChessBoardImpl boardImpl = (ChessBoardImpl) board;
         // assess forward left position
         if (forwardLeftPosition.getRow() >= 1 && forwardLeftPosition.getRow() <= 8 && forwardLeftPosition.getColumn() >= 1) {
-            assessAttack(board, myPosition, validMoves, forwardLeftPosition, boardImpl);
+            assessAttack(myPosition, validMoves, forwardLeftPosition, boardImpl);
         }
         // assess forward right position
         if (forwardRightPosition.getRow() >= 1 && forwardRightPosition.getRow() <= 8 && forwardRightPosition.getColumn() <= 8) {
-            assessAttack(board, myPosition, validMoves, forwardRightPosition, boardImpl);
+            assessAttack(myPosition, validMoves, forwardRightPosition, boardImpl);
         }
         // assess double forward position
         if ((myRow == 2 && color == ChessGame.TeamColor.WHITE) || (myRow == 7 && color == ChessGame.TeamColor.BLACK)) {
@@ -40,11 +40,13 @@ public class Pawn extends ChessPieceImpl {
         return validMoves;
     }
 
-    private void assessAttack(ChessBoard board, ChessPosition myPosition, HashSet<ChessMove> validMoves, ChessPositionImpl forwardLeftPosition, ChessBoardImpl boardImpl) {
-        boolean isEnPassantMove = boardImpl.enPassantMove != null && boardImpl.enPassantMove.getRow() == forwardLeftPosition.getRow() && boardImpl.enPassantMove.getColumn() == forwardLeftPosition.getColumn();
-        if (board.getPiece(forwardLeftPosition) != null || isEnPassantMove) {
-            if (isEnPassantMove || board.getPiece(forwardLeftPosition).getTeamColor() != color) {
-                addMoves(myPosition, validMoves, forwardLeftPosition);
+    private void assessAttack(ChessPosition myPosition, HashSet<ChessMove> validMoves, ChessPositionImpl attackPosition, ChessBoardImpl boardImpl) {
+        boolean isEnPassantMove = boardImpl.enPassantMove != null && boardImpl.enPassantMove.getRow() == attackPosition.getRow() && boardImpl.enPassantMove.getColumn() == attackPosition.getColumn();
+        ChessPieceImpl foundPiece = (ChessPieceImpl) boardImpl.getPiece(attackPosition);
+        if (foundPiece != null || isEnPassantMove) {
+            boolean isValidEnPassantMove = isEnPassantMove && boardImpl.enPassantMove.getRow() == ((color == ChessGame.TeamColor.WHITE) ? 6 : 3);
+            if (isValidEnPassantMove || (foundPiece != null && foundPiece.getTeamColor() != color)) {
+                addMoves(myPosition, validMoves, attackPosition);
             }
         }
     }
