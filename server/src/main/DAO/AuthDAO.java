@@ -21,7 +21,7 @@ public class AuthDAO implements DAO {
             var command = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
             var preparedStatement = connection.prepareStatement(command);
 
-            preparedStatement.setString(1, authToken.authToken);
+            preparedStatement.setString(1, authToken.authString);
             preparedStatement.setString(2, authToken.username);
 
             preparedStatement.executeUpdate();
@@ -67,7 +67,7 @@ public class AuthDAO implements DAO {
             if (resultSet.next()) {
                 var username = resultSet.getString("username");
                 returnToken = new AuthToken(username);
-                returnToken.authToken = authToken;
+                returnToken.authString = authToken;
             }
             return returnToken;
         } catch (SQLException e) {
@@ -93,7 +93,7 @@ public class AuthDAO implements DAO {
             if (resultSet.next()) {
                 var authToken = resultSet.getString("authToken");
                 var returnToken = new AuthToken(username);
-                returnToken.authToken = authToken;
+                returnToken.authString = authToken;
                 return returnToken;
             } else {
                 throw new DataAccessException(500, "Auth token for username " + username + " not found");

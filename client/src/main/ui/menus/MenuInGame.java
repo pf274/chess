@@ -5,14 +5,13 @@ import ui.BoardDisplay;
 import ui.facades.ServerFacade;
 import ui.facades.WebSocketFacade;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Scanner;
 
 public class MenuInGame extends MenuBase {
     private boolean initialized = false;
     private boolean exited = false;
-    private String[] options = new String[] {
+    private final String[] options = new String[] {
             "Move",
             "Flip Board",
             "Highlight Legal Moves",
@@ -32,7 +31,7 @@ public class MenuInGame extends MenuBase {
     public void run() {
         display();
         if (exited) {
-            ServerFacade.getInstance().leaveGame(authToken.authToken, gameID);
+            ServerFacade.getInstance().leaveGame(authToken.authString, gameID);
             WebSocketFacade.getInstance().leaveGame(gameID);
             MenuBase.setInstance(new MenuMain(scanner));
         }

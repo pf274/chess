@@ -10,7 +10,7 @@ public class AuthToken {
     /**
      * The auth token string
      */
-    public String authToken;
+    public String authString;
 
     /**
      * The username associated with this auth token
@@ -23,6 +23,6 @@ public class AuthToken {
      */
     public AuthToken(String username) {
         this.username = username;
-        this.authToken = UUID.randomUUID().toString();
+        this.authString = UUID.randomUUID().toString();
     }
 }

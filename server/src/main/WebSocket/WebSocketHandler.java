@@ -125,21 +125,16 @@ public class WebSocketHandler {
                 return;
             }
             // remove user from the game
-            boolean disconnected = false;
             if (Objects.equals(loadedGame.whiteUsername, username)) {
                 loadedGame.whiteUsername = null;
                 gameDataService.saveGame(loadedGame);
-                disconnected = true;
             } else if (Objects.equals(loadedGame.blackUsername, username)) {
                 loadedGame.blackUsername = null;
                 gameDataService.saveGame(loadedGame);
-                disconnected = true;
             }
-            if (disconnected) {
-                ServerMessageNotification notification = new ServerMessageNotification(username + " has disconnected from the game.");
-                connectionManager.broadcastMessageToOthers(username, gameID, notification);
-                connectionManager.removeConnection(gameID, username);
-            }
+            ServerMessageNotification notification = new ServerMessageNotification(username + " has disconnected from the game.");
+            connectionManager.broadcastMessageToOthers(username, gameID, notification);
+            connectionManager.removeConnection(gameID, username);
         } catch (ServiceException e) {
             System.out.println(e.getMessage());
         }

@@ -50,7 +50,7 @@ public class LoginService extends ServiceBase {
     public void logout(String username) throws ServiceException {
         try {
             AuthToken matchingAuthToken = authDAO.getAuthTokenByUsername(username);
-            authDAO.deleteAuthToken(matchingAuthToken.authToken);
+            authDAO.deleteAuthToken(matchingAuthToken.authString);
         } catch (DataAccessException e) {
             throw new ServiceException(500, e.getMessage());
         }

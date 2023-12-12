@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class MenuObservingGame extends MenuBase {
     private boolean initialized = false;
     private boolean exited = false;
-    private String[] options = new String[] {
+    private final String[] options = new String[] {
             "Flip Board",
             "Help",
             "Leave"
@@ -26,7 +26,7 @@ public class MenuObservingGame extends MenuBase {
     public void run() {
         display();
         if (exited) {
-            ServerFacade.getInstance().leaveGame(authToken.authToken, gameID);
+            ServerFacade.getInstance().leaveGame(authToken.authString, gameID);
             WebSocketFacade.getInstance().leaveGame(gameID);
             MenuBase.setInstance(new MenuMain(scanner));
         }
@@ -56,11 +56,6 @@ public class MenuObservingGame extends MenuBase {
                     MenuBase.orientation = "white";
                 }
                 BoardDisplay.displayBoard();
-                break;
-            case "help":
-            case "h":
-            case "2":
-                printOptions(options);
                 break;
             case "leave":
             case "l":

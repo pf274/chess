@@ -1,6 +1,5 @@
 package ui.menus;
 
-import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
@@ -13,7 +12,7 @@ import java.util.Scanner;
 public class MenuMain extends MenuBase {
     private boolean initialized = false;
 
-    private String[] options = new String[6];
+    private final String[] options = new String[6];
 
     @Override
     public void run() {
@@ -86,7 +85,7 @@ public class MenuMain extends MenuBase {
         System.out.println("Logging out...");
         try {
             ServerFacade serverFacade = ServerFacade.getInstance();
-            APIResponse response = serverFacade.logout(authToken.authToken);
+            APIResponse response = serverFacade.logout(authToken.authString);
             if (response.statusCode == 200) {
                 System.out.println("Logged out!");
             } else {
@@ -100,7 +99,7 @@ public class MenuMain extends MenuBase {
     private void listGames() {
         try {
             ServerFacade serverFacade = ServerFacade.getInstance();
-            APIResponse response = serverFacade.listGames(authToken.authToken);
+            APIResponse response = serverFacade.listGames(authToken.authString);
             if (response.statusCode == 200) {
                 HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
                 if (responseMap.containsKey("games")) {

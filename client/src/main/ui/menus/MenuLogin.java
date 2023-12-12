@@ -48,9 +48,6 @@ public class MenuLogin extends MenuBase {
 
     private void attemptLogin() {
         System.out.println("Logging in...");
-        Map<String, String> body = new HashMap<>();
-        body.put("username", username);
-        body.put("password", password);
         try {
             ServerFacade serverFacade = ServerFacade.getInstance();
             APIResponse response = serverFacade.login(username, password);
@@ -61,7 +58,7 @@ public class MenuLogin extends MenuBase {
                 System.out.println(responseMap.get("error"));
             } else {
                 AuthToken newAuthToken = new AuthToken(username);
-                newAuthToken.authToken = responseMap.get("authToken").toString();
+                newAuthToken.authString = responseMap.get("authToken").toString();
                 MenuBase.setAuthToken(newAuthToken);
                 loggedIn = true;
             }

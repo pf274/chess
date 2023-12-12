@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import ui.facades.ServerFacade;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -70,7 +69,7 @@ public class MenuRegister extends MenuBase {
                 System.out.println(responseMap.get("message"));
             } else {
                 AuthToken newAuthToken = new AuthToken(username);
-                newAuthToken.authToken = responseMap.get("authToken").toString();
+                newAuthToken.authString = responseMap.get("authToken").toString();
                 MenuBase.setAuthToken(newAuthToken);
                 loggedIn = true;
                 System.out.println("Logged in!");

@@ -1,6 +1,5 @@
 package ui.menus;
 
-import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
 import ui.facades.ServerFacade;
@@ -27,11 +26,9 @@ public class MenuCreateGame extends MenuBase {
         if (gameName.equals("exit") || gameName.equals("e")) {
             return;
         }
-        HashMap<String, String> body = new HashMap<>();
-        body.put("gameName", gameName);
         try {
             ServerFacade serverFacade = ServerFacade.getInstance();
-            APIResponse response = serverFacade.createGame(gameName, MenuBase.authToken.authToken);
+            APIResponse response = serverFacade.createGame(gameName, MenuBase.authToken.authString);
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("gameID")) {
                 int gameID = (int) Math.floor((Double) responseMap.get("gameID"));

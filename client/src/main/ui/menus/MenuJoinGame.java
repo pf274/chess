@@ -1,12 +1,10 @@
 package ui.menus;
 
-import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import ui.facades.ServerFacade;
 import ui.facades.WebSocketFacade;
-import userCommands.UserGameCommand;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,14 +15,12 @@ public class MenuJoinGame extends MenuBase {
 
     private boolean exited = false;
 
-    private String gameName = null;
-
     private String playerColor = null;
 
     private boolean success = false;
     int gameID;
 
-    private HashMap<String, String> games = new HashMap<>();
+    private final HashMap<String, String> games = new HashMap<>();
 
     public MenuJoinGame(Scanner scanner) {
         super(scanner);
@@ -79,11 +75,10 @@ public class MenuJoinGame extends MenuBase {
     }
 
     private boolean joinGame(int gameID) {
-        APIResponse response = ServerFacade.getInstance().joinGame(authToken.authToken, gameID, playerColor);
+        APIResponse response = ServerFacade.getInstance().joinGame(authToken.authString, gameID, playerColor);
         if (response.statusCode == 200) {
             HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
             if (responseMap.containsKey("gameName")) {
-                gameName = (String) responseMap.get("gameName");
                 return true;
             } else {
                 System.out.println("Error: " + response.statusMessage);
@@ -100,7 +95,7 @@ public class MenuJoinGame extends MenuBase {
 
     private void getListOfGames() {
         games.clear();
-        APIResponse response = ServerFacade.getInstance().listGames(authToken.authToken);
+        APIResponse response = ServerFacade.getInstance().listGames(authToken.authString);
         HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
         ArrayList<LinkedTreeMap> games = (ArrayList<LinkedTreeMap>) responseMap.get("games");
         for (LinkedTreeMap game : games) {

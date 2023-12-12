@@ -10,11 +10,11 @@ import java.util.HashMap;
 
 public class ServerFacadeTests {
 
-    private String registeredUsername = "testUser";
+    private final String registeredUsername = "testUser";
 
-    private String registeredPassword = "testPassword";
+    private final String registeredPassword = "testPassword";
 
-    private String registeredEmail = "test@gmail.com";
+    private final String registeredEmail = "test@gmail.com";
 
     private AuthToken registeredAuthToken = null;
 
@@ -27,7 +27,7 @@ public class ServerFacadeTests {
         APIResponse registerResponse = serverFacade.register(registeredUsername, registeredPassword, registeredEmail);
         HashMap registerResponseMap = new Gson().fromJson(registerResponse.statusMessage, HashMap.class);
         registeredAuthToken = new AuthToken(registeredUsername);
-        registeredAuthToken.authToken = registerResponseMap.get("authToken").toString();
+        registeredAuthToken.authString = registerResponseMap.get("authToken").toString();
     }
 
     @Test
@@ -68,7 +68,7 @@ public class ServerFacadeTests {
     @DisplayName("ServerFacade: logout (success)")
     public void testLogoutSuccess() {
         ServerFacade serverFacade = ServerFacade.getInstance();
-        APIResponse logoutResponse = serverFacade.logout(registeredAuthToken.authToken);
+        APIResponse logoutResponse = serverFacade.logout(registeredAuthToken.authString);
         assert logoutResponse.statusCode == 200;
     }
 
@@ -84,7 +84,7 @@ public class ServerFacadeTests {
     @DisplayName("ServerFacade: createGame (success)")
     public void testCreateGameSuccess() {
         ServerFacade serverFacade = ServerFacade.getInstance();
-        APIResponse createGameResponse = serverFacade.createGame("testGame", registeredAuthToken.authToken);
+        APIResponse createGameResponse = serverFacade.createGame("testGame", registeredAuthToken.authString);
         assert createGameResponse.statusCode == 200;
     }
 
@@ -100,7 +100,7 @@ public class ServerFacadeTests {
     @DisplayName("ServerFacade: listGames (success)")
     public void testListGamesSuccess() {
         ServerFacade serverFacade = ServerFacade.getInstance();
-        APIResponse listGamesResponse = serverFacade.listGames(registeredAuthToken.authToken);
+        APIResponse listGamesResponse = serverFacade.listGames(registeredAuthToken.authString);
         assert listGamesResponse.statusCode == 200;
     }
 
@@ -116,11 +116,11 @@ public class ServerFacadeTests {
     @DisplayName("ServerFacade: joinGame (success)")
     public void testJoinGameSuccess() {
         ServerFacade serverFacade = ServerFacade.getInstance();
-        APIResponse createGameResponse = serverFacade.createGame("testGame", registeredAuthToken.authToken);
+        APIResponse createGameResponse = serverFacade.createGame("testGame", registeredAuthToken.authString);
         HashMap createGameResponseMap = new Gson().fromJson(createGameResponse.statusMessage, HashMap.class);
         String rawGameID = createGameResponseMap.get("gameID").toString();
         int gameID = (int) Float.parseFloat(rawGameID);
-        APIResponse joinGameResponse = serverFacade.joinGame(registeredAuthToken.authToken, gameID, "white");
+        APIResponse joinGameResponse = serverFacade.joinGame(registeredAuthToken.authString, gameID, "white");
         assert joinGameResponse.statusCode == 200;
     }
 
@@ -128,7 +128,7 @@ public class ServerFacadeTests {
     @DisplayName("ServerFacade: joinGame (failure)")
     public void testJoinGameFailure() {
         ServerFacade serverFacade = ServerFacade.getInstance();
-        APIResponse createGameResponse = serverFacade.createGame("testGame", registeredAuthToken.authToken);
+        APIResponse createGameResponse = serverFacade.createGame("testGame", registeredAuthToken.authString);
         HashMap createGameResponseMap = new Gson().fromJson(createGameResponse.statusMessage, HashMap.class);
         String rawGameID = createGameResponseMap.get("gameID").toString();
         int gameID = (int) Float.parseFloat(rawGameID);

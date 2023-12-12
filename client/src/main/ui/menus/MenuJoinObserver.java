@@ -1,12 +1,10 @@
 package ui.menus;
 
-import Models.AuthToken;
 import Responses.APIResponse;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import ui.facades.ServerFacade;
 import ui.facades.WebSocketFacade;
-import userCommands.UserGameCommand;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +20,7 @@ public class MenuJoinObserver extends MenuBase {
 
     private int gameID;
 
-    private HashMap<String, String> games = new HashMap<>();
-    private String gameName = null;
+    private final HashMap<String, String> games = new HashMap<>();
 
     public MenuJoinObserver(Scanner scanner) {
         super(scanner);
@@ -38,7 +35,7 @@ public class MenuJoinObserver extends MenuBase {
         }
         if (success) {
             WebSocketFacade.getInstance().joinGameAsObserver(gameID);
-            MenuBase.setInstance(new MenuInGame(gameID, null, scanner));
+            MenuBase.setInstance(new MenuObservingGame(gameID, scanner));
         }
         MenuBase.setInstance(new MenuMain(scanner));
     }
@@ -65,11 +62,9 @@ public class MenuJoinObserver extends MenuBase {
     }
 
     private boolean joinGame(int gameID) {
-        var response = ServerFacade.getInstance().joinGame(authToken.authToken, gameID, null);
+        var response = ServerFacade.getInstance().joinGame(authToken.authString, gameID, null);
         if (response.statusCode == 200) {
             System.out.println("Successfully joined game " + gameID + " as observer");
-            HashMap responseValues = new Gson().fromJson(response.statusMessage, HashMap.class);
-            gameName = (String) responseValues.get("gameName");
             return true;
         } else {
             System.out.println("Failed to join game " + gameID + " as observer");
@@ -80,7 +75,7 @@ public class MenuJoinObserver extends MenuBase {
 
     private void getListOfGames() {
         games.clear();
-        APIResponse response = ServerFacade.getInstance().listGames(authToken.authToken);
+        APIResponse response = ServerFacade.getInstance().listGames(authToken.authString);
         HashMap responseMap = new Gson().fromJson(response.statusMessage, HashMap.class);
         ArrayList<LinkedTreeMap> games = (ArrayList<LinkedTreeMap>) responseMap.get("games");
         for (LinkedTreeMap game : games) {

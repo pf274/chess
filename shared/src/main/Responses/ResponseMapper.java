@@ -97,7 +97,7 @@ public class ResponseMapper {
     public static void loginResponse(AuthToken authToken, Response res) {
         HashMap<String, String> responseValues = new HashMap<>();
         responseValues.put("username", authToken.username);
-        responseValues.put("authToken", authToken.authToken);
+        responseValues.put("authToken", authToken.authString);
         APIResponse apiResponse = new APIResponse(200, responseValues);
         res.status(apiResponse.statusCode);
         res.body(apiResponse.statusMessage);
@@ -123,7 +123,7 @@ public class ResponseMapper {
     public static void registerResponse(AuthToken authToken, Response res) {
         HashMap<String, String> responseValues = new HashMap<>();
         responseValues.put("username", authToken.username);
-        responseValues.put("authToken", authToken.authToken);
+        responseValues.put("authToken", authToken.authString);
         APIResponse apiResponse = new APIResponse(200, responseValues);
         res.status(apiResponse.statusCode);
         res.body(apiResponse.statusMessage);

@@ -72,7 +72,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void joinGameAsPlayer(int gameID, String teamColor) {
         try {
-            UserGameCommandJoinPlayer joinPlayerCommand = new UserGameCommandJoinPlayer(MenuBase.authToken.authToken, gameID, ChessGame.TeamColor.valueOf(teamColor.toUpperCase()));
+            UserGameCommandJoinPlayer joinPlayerCommand = new UserGameCommandJoinPlayer(MenuBase.authToken.authString, gameID, ChessGame.TeamColor.valueOf(teamColor.toUpperCase()));
             sendMessage(joinPlayerCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -81,7 +81,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void joinGameAsObserver(int gameID) {
         try {
-            UserGameCommandJoinObserver joinObserverCommand = new UserGameCommandJoinObserver(MenuBase.authToken.authToken, gameID);
+            UserGameCommandJoinObserver joinObserverCommand = new UserGameCommandJoinObserver(MenuBase.authToken.authString, gameID);
             sendMessage(joinObserverCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -89,7 +89,7 @@ public class WebSocketFacade extends Endpoint {
     }
     public void leaveGame(int gameID) {
         try {
-            UserGameCommandLeave leaveCommand = new UserGameCommandLeave(MenuBase.authToken.authToken, gameID);
+            UserGameCommandLeave leaveCommand = new UserGameCommandLeave(MenuBase.authToken.authString, gameID);
             sendMessage(leaveCommand);
             this.session.close();
             WebSocketFacade.instance = null;
@@ -101,7 +101,7 @@ public class WebSocketFacade extends Endpoint {
     public void makeMove(ChessMove move, int gameID) {
         try {
             ChessMoveImpl moveImpl = (ChessMoveImpl) move;
-            UserGameCommandMakeMove makeMoveCommand = new UserGameCommandMakeMove(MenuBase.authToken.authToken, gameID, moveImpl);
+            UserGameCommandMakeMove makeMoveCommand = new UserGameCommandMakeMove(MenuBase.authToken.authString, gameID, moveImpl);
             sendMessage(makeMoveCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -110,7 +110,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void resign(int gameID) {
         try {
-            UserGameCommandResign resignCommand = new UserGameCommandResign(MenuBase.authToken.authToken, gameID);
+            UserGameCommandResign resignCommand = new UserGameCommandResign(MenuBase.authToken.authString, gameID);
             sendMessage(resignCommand);
         } catch (Exception e) {
             System.out.println(e.getMessage());
